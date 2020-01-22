@@ -2,11 +2,9 @@
 
 const async = require('async');
 const validate = require('./lib/validate');
-//const isIp = require('is-ip');
 const authorize = require('./lib/authorize');
 const ip2geo  = require('./lib/ip2geo');
 const ip2asn  = require('./lib/ip2asn');
-//const postgres_client = require('./postgres/postgres-client');
 const moment = require('moment');
 const payloadLogger = require('./postgres/payload-logger');
 

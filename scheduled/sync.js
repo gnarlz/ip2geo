@@ -33,7 +33,6 @@ module.exports.run = (event, context, callback) => {
             }
 
             for (let i = 0; i < rows.length; i++) {
-
                 let payload = {};
                 payload.authorized = rows[i].authorized;
                 payload.message = rows[i].message;
@@ -45,7 +44,6 @@ module.exports.run = (event, context, callback) => {
                     payload.ratelimit_duration = Number(rows[i].ratelimit_duration);
                 }
 
-
                 console.log("sync.run -      key: " + rows[i].key + "    authorized: " + rows[i].authorized + "     message: " + rows[i].message +
                     "     updated_at: " + moment(rows[i].updated_at).format('YYYY-MM-DD HH:mm:ss.SSSSSS') +
                     "      ratelimit_max: " + rows[i].ratelimit_max + "     ratelimit_duration: " + rows[i].ratelimit_duration);
@@ -53,7 +51,6 @@ module.exports.run = (event, context, callback) => {
 
                 let akey = "authorized:" +  rows[i].key;
                 redis_client.set(akey, JSON.stringify(payload), function (err, reply) {
-
                     if (err) {
                         console.error("sync.run - problem upserting row into redis:     key: " + akey + "    authorized: " + payload.authorized +
                             "     message:" + payload.message + "     updated_at: " + payload.ts +
@@ -65,10 +62,9 @@ module.exports.run = (event, context, callback) => {
                             "     message:" + payload.message + "     updated_at: " + payload.ts +  "      ratelimit_max: " + payload.ratelimit_max + "     ratelimit_duration: " + payload.ratelimit_duration);
                         return callback(null);
                     }
-
                 });
             }
         }
     });
-}
+};
 

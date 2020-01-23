@@ -10,3 +10,22 @@
  
  
  ip2geo is deployed on AWS.
+ 
+ 
+ ## Data Sources
+IP address data returned by the API is sourced from a variety of reliable providers, including commercial, non-commercial and proprietary data sources. Each source is validated using strict mechanisms and monitored constantly, which makes it possible to ensure the highest level of data quality and consistency at any given point in time. 
+ 
+ 
+ ## Features
+ 
+ # rate limiting
+ dvdsvfbdgb
+ 
+ 
+ ## Stripe
+ cdsfsdvdg
+ 
+ ## zsets in redis
+ 
+ 
+ 

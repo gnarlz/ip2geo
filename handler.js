@@ -17,7 +17,6 @@ module.exports.lookup = (event, context, callback) => {
     //if (event.source === 'serverless-plugin-warmup')  return callback(null, 'Lambda is warm!')
 
     const start = new Date();
-    //let time_elapsed;
 
     let {ip, key} = event.queryStringParameters || {};
     if (!ip) {

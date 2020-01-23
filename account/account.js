@@ -160,11 +160,11 @@ module.exports.create = (event, context, callback) => {
 
                 const msg = {
                     to: account_data.email,
-                    cc: 'support@ip2geo.co',
-                    bcc: ['tom@telematic.io'],
-                    from: 'support@ip2geo.co',
-                    replyTo: 'support@ip2geo.co',
-                    templateId: 'd-f79b447d5a2e4dd083d70aaa2294fcf1',
+                    cc: process.env.NEW_ACCOUNT_EMAIL_CC,
+                    bcc: [process.env.NEW_ACCOUNT_EMAIL_BC],
+                    from: process.env.NEW_ACCOUNT_EMAIL_FROM,
+                    replyTo: process.env.NEW_ACCOUNT_EMAIL_REPLYTO,
+                    templateId: process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID,
                     dynamicTemplateData: {
                         "fname": "",
                         "key": account_data.key,
@@ -250,10 +250,7 @@ module.exports.display = (event, context, callback) => {
 
     const start = new Date();
     let time_elapsed;
-
     let {key} = event.queryStringParameters || {};
-    console.log("account.display - key: " + key);
-
     const request_id = context.awsRequestId;
     let source_ip =  event['requestContext']['identity']['sourceIp'];
     let request_ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
@@ -346,13 +343,10 @@ module.exports.display = (event, context, callback) => {
             request.request_id = request_id;
             request.request_ts = request_ts;
             request.source_ip = source_ip;
-
-            request.is_desktop = (event['headers']['CloudFront-Is-Desktop-Viewer'] == "true")? true:false;
-            request.is_mobile = (event['headers']['CloudFront-Is-Mobile-Viewer'] == "true")? true:false;
-            request.is_smart_tv = (event['headers']['CloudFront-Is-SmartTV-Viewer'] == "true")? true:false;
-            request.is_tablet = (event['headers']['CloudFront-Is-Tablet-Viewer'] == "true")? true:false;
-
-
+            request.is_desktop = (event['headers']['CloudFront-Is-Desktop-Viewer'] === "true");
+            request.is_mobile = (event['headers']['CloudFront-Is-Mobile-Viewer'] === "true");
+            request.is_smart_tv = (event['headers']['CloudFront-Is-SmartTV-Viewer'] === "true");
+            request.is_tablet = (event['headers']['CloudFront-Is-Tablet-Viewer'] === "true");
             request.viewer_country = event['headers']['CloudFront-Viewer-Country'];
             request.accept_language = event['headers']['Accept-Language'];
             request.origin = event['headers']['origin'];

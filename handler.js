@@ -12,10 +12,6 @@ const payloadLogger = require('./postgres/payload-logger');
 module.exports.lookup = (event, context, callback) => {
 
     context.callbackWaitsForEmptyEventLoop = false;
-
-    // serverless warmup plugin did weird unpredictible stuff, thats why this is commented out
-    //if (event.source === 'serverless-plugin-warmup')  return callback(null, 'Lambda is warm!')
-
     const start = new Date();
 
     let {ip, key} = event.queryStringParameters || {};

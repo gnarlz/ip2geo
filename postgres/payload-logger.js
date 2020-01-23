@@ -65,7 +65,10 @@ exports.log = function(payload, callback) {
     postgres_client.query(sql, values, (err, res) => {
         if (err) {
             console.error("payload-logger.log - problem persisting log statement in postgres: " + err);
+            console.error("payload-logger.log - payload: " + JSON.stringify(payload));
+            console.error("payload-logger.log - values: " + values);
         }
+
         callback(null);
     });
 

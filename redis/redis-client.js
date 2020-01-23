@@ -5,20 +5,17 @@ const redis = require('redis');
 let client;
 if (typeof client === 'undefined') {
 
-
     client    = redis.createClient({
         port      : process.env.REDIS_PORT,
         host      : process.env.REDIS_IP_ADDRESS,
         password  : process.env.REDIS_PASS
     });
 
-
     // localhost
     /*
     client    = redis.createClient({
     });
     */
-
 
     client.on('connect', function() {
         console.log("redis - connected");
@@ -29,6 +26,4 @@ if (typeof client === 'undefined') {
     });
 
 }
-
-
 module.exports = client;

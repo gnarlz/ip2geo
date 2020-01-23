@@ -8,7 +8,6 @@
  
  Postgres is used as the data store for subscriber and account related data, while Redis is used to hold the geo and
  
- 
  ip2geo is deployed on AWS.
  
  
@@ -18,14 +17,18 @@ IP address data returned by the API is sourced from a variety of reliable provid
  
  ## Features
  
- # rate limiting
+ ### rate limiting
  dvdsvfbdgb
+ 
+ ### zsets in redis
+ dvdsvfbdgb
+ 
  
  
  ## Stripe
  cdsfsdvdg
  
- ## zsets in redis
+
  
  
  

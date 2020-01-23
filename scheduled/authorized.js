@@ -1,15 +1,17 @@
 'use strict';
 
-
 const postgres_client = require('../postgres/postgres-client');
 const moment = require('moment');
 
-
 /*
 authorized.run:
-    looks for keys that have exceeded their monthly request limit
-    when it finds a key that is over limit, it updates postgres key.authorization to false to turn their access off
- */
+    this is a scheduled task, with frequency defined in serverless.yml
+    it looks in postgres for keys that have exceeded their monthly request limit
+    when it finds a key that is over limit, it inserts a new row into postgres key.authorization indicating authorization is false
+
+    a more elegant solution would be to determine in real time when a key has exceeded its limit  (i.e. each time a request is made), and de-authorize it then.
+    seems excessive at this point, may revisit later
+*/
 
 module.exports.run = (event, context, callback) => {
 
@@ -64,10 +66,9 @@ module.exports.run = (event, context, callback) => {
                 limit = rows[i].limit_;
                 ratelimit_max = rows[i].ratelimit_max;
                 ratelimit_duration = rows[i].ratelimit_duration;
-
-                let now = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
                 console.log("authorized.run -      key: " + key + "    requests: " + requests + "     limit:" + limit);
 
+                //let 'em go 20% over limit
                 if(Number(requests) > (1.2*(Number(limit)))){
                     postgres_client.query("INSERT INTO key.authorization (key, authorized, message, created_at, updated_at, ratelimit_max, ratelimit_duration) values ('" +
                         key + "', false, '" + message + "', now(), now(), " + ratelimit_max + " , " + ratelimit_duration + ")",  (error, result) => {
@@ -76,18 +77,15 @@ module.exports.run = (event, context, callback) => {
                         }
                         else {
                             console.log("authorized.run - inserted row into key.authorization:     key: " +
-                                key + "    authorized: false    message: " + message + "   updated_at: "  + now +
+                                key + "    authorized: false    message: " + message + "   updated_at: "  +
+                                moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS') +
                                 "     ratelimit_max: " + ratelimit_max + "      ratelimit_duration: " + ratelimit_duration);
                         }
                     });
-
                 }
-
-
-
-            } // for
+            }
             callback(null);
-        } // else
+        }
     });
-}
+};
 

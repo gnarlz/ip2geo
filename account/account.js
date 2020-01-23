@@ -268,10 +268,8 @@ module.exports.display = (event, context, callback) => {
     let authorized_last_message;
     let authorized_last_updated_date;
 
-
     const response = {};
-    // enable CORS in api gateway when using lambda proxy integration
-    response.headers = {"Access-Control-Allow-Origin": "*"};
+    response.headers = {"Access-Control-Allow-Origin": "*"};    // enable CORS in api gateway when using lambda proxy integration
 
     async.waterfall(
         [
@@ -295,7 +293,6 @@ module.exports.display = (event, context, callback) => {
                     "and key.authorization.key=key.request.key " +
                     "and request.key = '" + key + "'", (error, result) => {
 
-
                     if (error) {
                         console.error("account.display - error getting account status       key: " + key + "   error: " + error);
                         let postgres_error = new Error();
@@ -304,16 +301,13 @@ module.exports.display = (event, context, callback) => {
                         return callback(postgres_error);
                     }
                     else {
-
                         const rows = result.rows;
-
                         if(rows.length < 1){
                             console.log("account.display - no rows returned for key: " + key);
                             let no_rows_error = new Error();
                             no_rows_error.message = "No data returned for key: " + key;
                             no_rows_error.code = 400;
                             return callback(no_rows_error);
-
                         }
                         else if(rows.length > 1){
                             console.log("account.display - multiple rows returned for key: " + key);
@@ -331,7 +325,6 @@ module.exports.display = (event, context, callback) => {
                             authorized = rows[0].authorized;
                             authorized_last_message = rows[0].message;
                             authorized_last_updated_date = rows[0].authorization_updated_date;
-
                             callback(null);
                         }
                     }
@@ -339,7 +332,6 @@ module.exports.display = (event, context, callback) => {
             }
         ],
         function (err, results) {
-
             request.request_id = request_id;
             request.request_ts = request_ts;
             request.source_ip = source_ip;
@@ -353,26 +345,21 @@ module.exports.display = (event, context, callback) => {
             request.referer = event['headers']['Referer'];
             request.user_agent = event['headers']['User-Agent'];
 
+            payload.time_elapsed = new Date() - start;
+            payload.request = request;
+
             if (err) {
                 console.error("account.display - error returned from async.waterfall: " + err);
-
                 payload.status = "error";
                 payload.status_code = err.code;
-                time_elapsed = new Date() - start;
-                payload.time_elapsed = time_elapsed;
-                payload.request = request;
-
                 payload.error = {message: err.message};
+
                 response.statusCode = err.code;
                 response.body = JSON.stringify(payload);
             }
             else {
-
                 payload.status = "success";
                 payload.status_code = 200;
-                time_elapsed = new Date() - start;
-                payload.time_elapsed = time_elapsed;
-                payload.request = request;
 
                 account.monthly_request_limit = monthly_request_limit;
                 account.ratelimit_max = ratelimit_max;
@@ -382,51 +369,14 @@ module.exports.display = (event, context, callback) => {
                 account.authorized = authorized;
                 account.authorized_last_message = authorized_last_message;
                 account.authorized_last_updated_date = authorized_last_updated_date;
+
                 payload.account = account;
 
                 response.statusCode = 200;
                 response.body = JSON.stringify(payload);
-
             }
-
-
-
-            /*
-
-            SAMPLE RESPONSE
-
-            {
-                "status": "success",
-                "status_code": 200,
-                "time_elapsed": 41,
-                "request": {
-                    "request_id": "34a16a7e-c048-4d2e-b226-fb4714d98fb3",
-                    "request_ts": "2020-01-11 17:37:08.012000",
-                    "source_ip": "137.27.69.78",
-                    "is_desktop": true,
-                    "is_mobile": false,
-                    "is_smart_tv": false,
-                    "is_tablet": false,
-                    "viewer_country": "US",
-                    "accept_language": "en-US,en;q=0.9",
-                    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"
-                },
-                "account": {
-                    "monthly_request_limit": "10000000",
-                    "ratelimit_max": null,
-                    "ratelimit_duration": null,
-                    "monthly_limit_last_updated_date": "2020-01-08T12:35:48.109Z",
-                    "current_month_request_count": "2",
-                    "authorized": true,
-                    "authorized_last_message": "Account creation",
-                    "authorized_last_updated_date": "2020-01-08T12:35:48.111Z"
-                }
-            }
-
-            */
-
+            console.log(JSON.stringify(payload));
             callback(null, response);
-
         }
     );
 };

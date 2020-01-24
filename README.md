@@ -6,8 +6,6 @@
  
  ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
  
- Postgres is used as the data store for subscriber and account related data, while Redis is used to hold the geo and
- 
  ip2geo is deployed on AWS.
  
  
@@ -80,8 +78,25 @@ An example API response:
 }
 
 ```
-  ## Data Sources
+
+## Data Sources
+
 IP address data returned by the API is sourced from a variety of reliable providers, including commercial, non-commercial and proprietary data sources. 
+
+
+#### Geolocation and Firmographic Data
+
+Geolocation and firmographic data reside in Redis. All IP address CIDR ranges are converted to integers and are stored using a sorted set data structure within Redis.
+
+
+#### Account and Subscription Data
+
+Account and subscription data reside in Postgress. Due to their [slowly changing dimension](https://en.wikipedia.org/wiki/Slowly_changing_dimension) nature, the codebase considers these tables as immutable, and therefore only performs INSERTS against them (i.e. no UPDATES). AS a result, all history is preserved.
+
+Postgres schemas are described [here](https://github.com/gnarlz/ip2geo/blob/master/ip2geo-postgres.sql).
+
+
+
 
 
  ## Features

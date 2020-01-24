@@ -11,9 +11,24 @@
  ip2geo is deployed on AWS.
  
  
- ## Data Sources
-IP address data returned by the API is sourced from a variety of reliable providers, including commercial, non-commercial and proprietary data sources. 
-
+ ## API Request
+ 
+ #### Origin IP Lookup
+ To look up the IP address that the current API request is coming from (i.e. the IP of your users device), pass only your API key in the query string.
+ ```
+ https://api.ip2geo.co/v1/ip2geo?key=YOUR_API_KEY
+ ```
+ 
+ 
+ #### Standard IP Lookup
+ To look up a single IP address of your choice, pass an IPv4 or IPv6 address and your API key and in the query string.
+ ```
+https://api.ip2geo.co/v1/ip2geo?ip=IP_TO_LOOK_UP&key=YOUR_API_KEY
+ ```
+ 
+ 
+ ## API Response
+ 
 An example API response:
 
 ```
@@ -65,7 +80,10 @@ An example API response:
 }
 
 ```
- 
+  ## Data Sources
+IP address data returned by the API is sourced from a variety of reliable providers, including commercial, non-commercial and proprietary data sources. 
+
+
  ## Features
  
  ### Rate Limiting

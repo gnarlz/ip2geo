@@ -105,15 +105,16 @@ Typical API latencies are ~3ms (however, AWS API Gateway latencies add another ~
 ## Features
  
 ### Rate Limiting
-Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter).
+Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter). 
  
-## Stripe
-cdsfsdvdg
- 
+### Subscriptions and Recurring Payments
+Subscriptions and recurring payments are implemented using [Stripe](https://github.com/stripe/stripe-node).
+
+### Subscriber Email
+Subscriber email is implemented by [Sendgrid](https://github.com/sendgrid/sendgrid-nodejs/tree/master/packages/mail).
 
 
-It is a serverless implementation
- 
+## Shoutouts 
 ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
  
  

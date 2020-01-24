@@ -69,7 +69,7 @@ An example API response:
  ## Features
  
  ### Rate Limiting
- Rate limiting is implemented using [ratelimiter] (https://github.com/tj/node-ratelimiter).
+ Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter).
  
  ### zsets in redis
  dvdsvfbdgb

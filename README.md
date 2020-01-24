@@ -2,13 +2,7 @@
 
  [ip2geo](https://www.ip2geo.co) is an IP Address Geolocation API. 
  
- It is a serverless implementation, relying soly on Lambda functions written in NodeJS. 
- 
- ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
- 
- ip2geo is deployed on AWS.
- 
- 
+  
  ## API Request
  
  #### Origin IP Lookup
@@ -91,11 +85,18 @@ Geolocation and firmographic data reside in Redis. All IP address CIDR ranges ar
 
 #### Account and Subscription Data
 
-Account and subscription data reside in Postgress. Due to their [slowly changing dimension](https://en.wikipedia.org/wiki/Slowly_changing_dimension) nature, the codebase considers (most of) these tables as immutable, and therefore only performs INSERTS against them (i.e. no UPDATES). As a result, all history is preserved.
+Account and subscription data reside in Postgress. Due to their [slowly changing dimension](https://en.wikipedia.org/wiki/Slowly_changing_dimension) nature, the codebase considers (most of) these tables immutable, and only performs INSERTS against them (i.e. no UPDATES). As a result, all history is preserved.
 
 Postgres schemas are described [here](https://github.com/gnarlz/ip2geo/blob/master/ip2geo-postgres.sql).
 
 
+## Design Considerations
+
+Speed and Scalability
+
+API responses are served by AWS Lambda functions, written in NodeJS. All request/key authorization and API response data resides in Redis.
+
+Typical API latencies are ~3ms (however, AWS API Gateway latencies add another ~15ms).
 
 
 
@@ -113,6 +114,12 @@ Postgres schemas are described [here](https://github.com/gnarlz/ip2geo/blob/mast
  cdsfsdvdg
  
 
+
+It is a serverless implementation, relying soly on Lambda functions written in NodeJS. 
+ 
+ ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
+ 
+ ip2geo is deployed on AWS.
  
  
  

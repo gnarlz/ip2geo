@@ -100,26 +100,22 @@ Typical API latencies are ~3ms (however, AWS API Gateway latencies add another ~
 
 
 
- ## Features
+
+
+## Features
  
- ### Rate Limiting
- Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter).
+### Rate Limiting
+Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter).
  
- ### zsets in redis
- dvdsvfbdgb
- 
- 
- 
- ## Stripe
- cdsfsdvdg
+## Stripe
+cdsfsdvdg
  
 
 
-It is a serverless implementation, relying soly on Lambda functions written in NodeJS. 
+It is a serverless implementation
  
- ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
+ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
  
- ip2geo is deployed on AWS.
  
  
  

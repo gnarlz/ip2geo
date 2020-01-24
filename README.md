@@ -68,8 +68,8 @@ An example API response:
  
  ## Features
  
- ### rate limiting
- dvdsvfbdgb
+ ### Rate Limiting
+ Rate limiting is implemented using [ratelimiter] (https://github.com/tj/node-ratelimiter).
  
  ### zsets in redis
  dvdsvfbdgb

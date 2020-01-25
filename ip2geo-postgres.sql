@@ -89,7 +89,7 @@ is_anonymous_proxy boolean,
 is_satellite_provider boolean,
 asn character varying,
 organization character varying,
-error_message character varying,
+error_message character varying
 );
 CREATE INDEX idx_lookup_request_ts ON log.lookup(request_ts);
 CREATE INDEX idx_lookup_key ON log.lookup(key);

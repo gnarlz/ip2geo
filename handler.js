@@ -44,8 +44,18 @@ module.exports.lookup = (event, context, callback) => {
 
     async.waterfall(
         [
-            function validateArgs(callback) {
-                validate.args(ip, key, (err) => {
+            function validateIP(callback) {
+                validate.ip(ip, (err) => {
+                    if (err) {
+                        return callback(err);
+                    }
+                    else {
+                        callback(null);
+                    }
+                });
+            },
+            function validateKey(callback) {
+                validate.key(key, (err) => {
                     if (err) {
                         return callback(err);
                     }
@@ -191,11 +201,15 @@ module.exports.lookup = (event, context, callback) => {
             console.log(JSON.stringify(payload));
 
             // ====================================    POSTGRES LOGGING   ================================================
+
             //TODO: replace with a pipleline that consumes cloudwatch logs and inserts them into postgres
             payloadLogger.log(payload, () => {
                 payload.key = '';
                 callback(null, response);
             });
+
+
+            //callback(null, response);
 
         }
     );

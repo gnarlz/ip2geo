@@ -45,24 +45,10 @@ module.exports.lookup = (event, context, callback) => {
     async.waterfall(
         [
             function validateIP(callback) {
-                validate.ip(ip, (err) => {
-                    if (err) {
-                        return callback(err);
-                    }
-                    else {
-                        callback(null);
-                    }
-                });
+                callback(validate.ip(ip));
             },
             function validateKey(callback) {
-                validate.key(key, (err) => {
-                    if (err) {
-                        return callback(err);
-                    }
-                    else {
-                        callback(null);
-                    }
-                });
+                callback(validate.key(key));
             },
             function authorizeKey(callback) {
                 authorize.key(key, (err, data) => {

@@ -1,36 +1,44 @@
 'use strict';
 
-const {Client } = require('pg');
+const {Client} = require('pg');
+let client;
 
+if(process.env.POSTGRES_HOST){
 
-const client = new Client({
-    host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASS,
-    database: process.env.POSTGRES_DB
-})
+    client = new Client({
+        host: process.env.POSTGRES_HOST,
+        port: process.env.POSTGRES_PORT,
+        user: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASS,
+        database: process.env.POSTGRES_DB
+    });
+    client.connect(err => {
+        if (err) {
+            console.error('postgres connection error', err.stack);
+        } else {
+            console.log('postgres connected');
+        }
+    });
 
+} else{
 
-// localhost
-/*
-const client = new Client({
-    user: 'postgres',
-    host: '127.0.0.1',
-    database: 'ip2geo',
-    port: 5432,
-})
-*/
+    client = new Client({
+        host: 'rajje.db.elephantsql.com',
+        port: 5432,
+        user: 'rsljwbtb',
+        password: '5msxh2vbFCiYqSMXNfBsQfOuIRkfAH1d',
+        database: 'rsljwbtb',
+    });
 
+    client.connect(err => {
+        if (err) {
+            console.error('elephantsql connection error', err.stack);
+        } else {
+            console.log('elephantsql connected');
+        }
+    });
 
-client.connect(err => {
-    if (err) {
-        console.error('postgres connection error', err.stack)
-    } else {
-        console.log('postgres connected')
-    }
-});
-
+}
 
 module.exports = client;
 

@@ -179,45 +179,40 @@ module.exports.create = (event, context, callback) => {
 
             function sendNewSubscriberEmail(callback) {
 
-                if( process.env.MODE === 'test'){
-                    callback(null);
-                }else{
-                    // TODO: all this string building should be externalized
-                    let name_details = "You have subscribed to the " + account_data.display_name + " plan.";
-                    let limit_details = " This key is allowed " + Number(account_data.limit).toLocaleString() + " requests a month." ;
+                // TODO: all this string building should be externalized
+                let name_details = "You have subscribed to the " + account_data.display_name + " plan.";
+                let limit_details = " This key is allowed " + Number(account_data.limit).toLocaleString() + " requests a month." ;
 
-                    let ratelimit_details;
-                    if ((account_data.ratelimit_max) && (Number(account_data.ratelimit_max) > 0)){
-                        ratelimit_details = " The Free plan is rate limited to " + account_data.ratelimit_max + " requests per minute.";
-                    }
-                    else
-                    {
-                        ratelimit_details = "";
-                    }
-                    let plan_details = name_details.concat(limit_details, ratelimit_details);
-
-                    const msg = {
-                        to: account_data.email,
-                        cc: process.env.NEW_ACCOUNT_EMAIL_CC,
-                        bcc: [process.env.NEW_ACCOUNT_EMAIL_BC],
-                        from: process.env.NEW_ACCOUNT_EMAIL_FROM,
-                        replyTo: process.env.NEW_ACCOUNT_EMAIL_REPLYTO,
-                        templateId: process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID,
-                        dynamicTemplateData: {
-                            "fname": "",
-                            "key": account_data.key,
-                            "plan_details": plan_details
-                        }
-                    };
-
-                    sgMail.send(msg).then(() => {
-                        console.log('SENDGRID: Mail sent successfully');
-                        callback(null);
-                    }).catch(error => {
-                        console.error('SENDGRID ERROR: ' + error.toString());
-                        return callback(error);
-                    });
+                let ratelimit_details;
+                if ((account_data.ratelimit_max) && (Number(account_data.ratelimit_max) > 0)){
+                    ratelimit_details = " The Free plan is rate limited to " + account_data.ratelimit_max + " requests per minute.";
                 }
+                else {
+                    ratelimit_details = "";
+                }
+                let plan_details = name_details.concat(limit_details, ratelimit_details);
+
+                const msg = {
+                    to: account_data.email,
+                    cc: process.env.NEW_ACCOUNT_EMAIL_CC,
+                    bcc: [process.env.NEW_ACCOUNT_EMAIL_BC],
+                    from: process.env.NEW_ACCOUNT_EMAIL_FROM,
+                    replyTo: process.env.NEW_ACCOUNT_EMAIL_REPLYTO,
+                    templateId: process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID,
+                    dynamicTemplateData: {
+                        "fname": "",
+                        "key": account_data.key,
+                        "plan_details": plan_details
+                    }
+                };
+
+                sgMail.send(msg).then(() => {
+                    console.log('SENDGRID: Mail sent successfully');
+                    callback(null);
+                }).catch(error => {
+                    console.error('SENDGRID ERROR: ' + error.toString());
+                    return callback(error);
+                });
 
             }
         ],

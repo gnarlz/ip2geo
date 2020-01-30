@@ -4,6 +4,7 @@ const expect  = require("chai").expect;
 const handler = require('../handler');
 const test_setup = require('./lib/setup');
 const uuidv4 = require('uuid/v4');
+const config = require('./config.json');
 
 describe('handler.lookup',() => {
 
@@ -31,20 +32,25 @@ describe('handler.lookup',() => {
 
     const valid_key = uuidv4();
     const suspended_key = uuidv4();
+    process.env.VALID_KEY = valid_key;
+    process.env.SUSPENDED_KEY = suspended_key;
     console.log("valid testing API key for this test: " + valid_key);
     console.log("suspended testing API key for this test: " + suspended_key + "\n\n");
 
-    process.env.MODE = 'test';
+    process.env.MODE = config.MODE;
+    process.env.IP2GEO_KEYSPACE = config.IP2GEO_KEYSPACE;
+    process.env.IP2ASN_KEYSPACE = config.IP2ASN_KEYSPACE;
+    process.env.SOURCE_IP = config.SOURCE_IP;
+    process.env.IPV4_IP = config.IPV4_IP;
+    process.env.IPV6_IP = config.IPV6_IP;
+    process.env.SENDGRID_API_KEY = config.SENDGRID_API_KEY;
+    process.env.NEW_ACCOUNT_EMAIL_CC = config.NEW_ACCOUNT_EMAIL_CC;
+    process.env.NEW_ACCOUNT_EMAIL_BCC = config.NEW_ACCOUNT_EMAIL_BCC;
+    process.env.NEW_ACCOUNT_EMAIL_FROM = config.NEW_ACCOUNT_EMAIL_FROM;
+    process.env.NEW_ACCOUNT_EMAIL_REPLYTO = config.NEW_ACCOUNT_EMAIL_REPLYTO;
+    process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID = config.NEW_ACCOUNT_EMAIL_TEMPLATE_ID;
+    process.env.STRIPE_PRIVATE_KEY = config.STRIPE_PRIVATE_KEY;
 
-    process.env.VALID_KEY = valid_key;
-    process.env.SUSPENDED_KEY = suspended_key;
-
-    process.env.IP2GEO_KEYSPACE = 'ip2geo-11.20.2019';
-    process.env.IP2ASN_KEYSPACE = 'ip2asn-09.24.2019';
-
-    process.env.SOURCE_IP = '8.8.8.8';
-    process.env.IPV4_IP = '137.27.69.73';
-    process.env.IPV6_IP = '2001:200:1c0:2000:0:0:0:0';
 
 
     it('setup', (done) => {

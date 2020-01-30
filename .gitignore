@@ -11,7 +11,7 @@ sensitive
 git-notes
 git-cheatsheet.pdf
 serverless.yml
-config.json
+test/config.json
 
 # directories
 node_modules

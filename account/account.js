@@ -39,24 +39,57 @@ module.exports.create = (event, context, callback) => {
     response.headers = {"Access-Control-Allow-Origin": "*"}; // enable CORS in api gateway when using lambda proxy integration
 
     const account_data = {};
-    account_data.action = "account.create";
-    account_data.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
-    account_data.key = uuidv4();
-    account_data.subscription_id = event.subscription_id;
-    account_data.email = event.stripeEmail;
-    account_data.plan_id = event.planID;
-    account_data.plan_name = event.plan_name;
-    account_data.plan_created_at = plans[event.plan_name].created_at;
-    account_data.display_name = plans[event.plan_name].display_name;
-    account_data.limit = plans[event.plan_name].limit;
-    account_data.ratelimit_max = plans[event.plan_name].ratelimit_max;
-    account_data.ratelimit_duration = plans[event.plan_name].ratelimit_duration;
-    account_data.price = plans[event.plan_name].price;
-    console.log("creating account: " + JSON.stringify(account_data));
-
 
     async.waterfall(
         [
+            function validate(callback){
+                console.log('event.subscription_id: ' + event.subscription_id);
+                if(((typeof event.subscription_id === 'undefined')) || (event.subscription_id === '')){
+                    let error = new Error();
+                    error.message = "null or empty subscription_id";
+                    error.code = 400;
+                    callback(error);
+                }else if(((typeof event.stripeEmail === 'undefined')) || (event.stripeEmail === '')){
+                    let error = new Error();
+                    error.message = "null or empty stripeEmail";
+                    error.code = 400;
+                    callback(error);
+                } else if(((typeof event.planID === 'undefined')) || (event.planID === '')){
+                    let error = new Error();
+                    error.message = "null or empty planID";
+                    error.code = 400;
+                    callback(error);
+                }
+                else if(((typeof event.plan_name === 'undefined')) || (event.plan_name === '')){
+                    let error = new Error();
+                    error.message = "null or empty plan_name";
+                    error.code = 400;
+                    callback(error);
+                }
+                else{
+                    callback (null);
+                }
+            },
+
+            function populateAccountData(callback){
+                account_data.action = "account.create";
+                account_data.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
+                account_data.key = uuidv4();
+                account_data.subscription_id = event.subscription_id;
+                account_data.email = event.stripeEmail;
+                account_data.plan_id = event.planID;
+                account_data.plan_name = event.plan_name;
+
+                account_data.plan_created_at = plans[event.plan_name].created_at;
+                account_data.display_name = plans[event.plan_name].display_name;
+                account_data.limit = plans[event.plan_name].limit;
+                account_data.ratelimit_max = plans[event.plan_name].ratelimit_max;
+                account_data.ratelimit_duration = plans[event.plan_name].ratelimit_duration;
+                account_data.price = plans[event.plan_name].price;
+                console.log("creating account: " + JSON.stringify(account_data));
+                callback(null);
+            },
+
             function insertPostgresKeyAccount(callback) {
                 postgres_client.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at,updated_at) values ('" +
                     account_data.key + "', '" +
@@ -143,6 +176,7 @@ module.exports.create = (event, context, callback) => {
                     }
                 });
             },
+
             function sendNewSubscriberEmail(callback) {
                 // TODO: all this string building should be externalized
                 let name_details = "You have subscribed to the " + account_data.display_name + " plan.";
@@ -180,42 +214,54 @@ module.exports.create = (event, context, callback) => {
                         return callback(error);
                     });
             }
-
         ],
         function (err, results) {
             if (err) {
                 console.error("account.create - error creating account: " + JSON.stringify(account_data) + "   error: " + err);
                 account_data.status = 'ERROR';
                 account_data.message = err.toString();
+
                 response.statusCode = 500;
                 response.body = JSON.stringify(  {error: err.toString()} );
             } else {
                 console.log("account.create - successfully created account: " + JSON.stringify(account_data));
                 account_data.status = 'SUCCESS';
                 account_data.message = 'account created';
+
                 response.statusCode = 200;
                 response.body = JSON.stringify(  {key: account_data.key} );
             }
 
-            // send text and email to admin via sns topic with success/failure and details of new subscription details
-            let sns = new AWS.SNS();
-            let params = {
-                Message: JSON.stringify(account_data),
-                TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
-            };
-            sns.publish(params, function(sns_err, data) {
-                if(sns_err){
-                    console.error("problem publishing to sns topic in account.create: " + sns_err.toString());
-                    // intentionally throw this error on the floor - its annoying but not life threatening
-                }
 
+            if( process.env.MODE === 'test'){
                 if(err){
                     callback(err, response);
                 }
                 else{
                     callback(null, response);
                 }
-            });
+            } else{
+                // send text and email to admin via sns topic with success/failure and details of new subscription details
+                let sns = new AWS.SNS();
+                let params = {
+                    Message: JSON.stringify(account_data),
+                    TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
+                };
+                sns.publish(params, function(sns_err, data) {
+                    if(sns_err){
+                        console.error("problem publishing to sns topic in account.create: " + sns_err.toString());
+                        // intentionally throw this error on the floor - its annoying but not life threatening
+                    }
+
+                    if(err){
+                        callback(err, response);
+                    }
+                    else{
+                        callback(null, response);
+                    }
+                });
+            }
+
         }
     );
 
@@ -375,6 +421,8 @@ module.exports.display = (event, context, callback) => {
                 response.statusCode = 200;
                 response.body = JSON.stringify(payload);
             }
+
+            // ====================================   CLOUDWATCH LOGGING   ===============================================
             console.log(JSON.stringify(payload));
             callback(null, response);
         }

@@ -1,0 +1,20 @@
+# hidden files
+.DS_Store
+.idea
+
+# hidden directories
+.serverless
+
+# files
+notes
+sensitive
+git-notes
+git-cheatsheet.pdf
+serverless.yml
+config.json
+
+# directories
+node_modules
+jspm_packages
+tools
+safe

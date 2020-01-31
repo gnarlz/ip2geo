@@ -38,6 +38,7 @@ describe('handler.lookup',() => {
     console.log("suspended API key for this test: " + suspended_key + "\n\n");
 
     process.env.MODE = config.MODE;
+    process.env.IP2GEO_AWS_REGION = config.IP2GEO_AWS_REGION;
     process.env.IP2GEO_KEYSPACE = config.IP2GEO_KEYSPACE;
     process.env.IP2ASN_KEYSPACE = config.IP2ASN_KEYSPACE;
     process.env.SOURCE_IP = config.SOURCE_IP;
@@ -50,6 +51,10 @@ describe('handler.lookup',() => {
     process.env.NEW_ACCOUNT_EMAIL_REPLYTO = config.NEW_ACCOUNT_EMAIL_REPLYTO;
     process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID = config.NEW_ACCOUNT_EMAIL_TEMPLATE_ID;
     process.env.STRIPE_PRIVATE_KEY = config.STRIPE_PRIVATE_KEY;
+    process.env.STRIPE_MVP_PLAN = config.STRIPE_MVP_PLAN;
+    process.env.STRIPE_BOOTSTRAP_PLAN = config.STRIPE_BOOTSTRAP_PLAN;
+    process.env.STRIPE_STARTUP_PLAN = config.STRIPE_STARTUP_PLAN;
+    process.env.STRIPE_GROWTH_PLAN = config.STRIPE_GROWTH_PLAN;
 
 
     it('setup', (done) => {

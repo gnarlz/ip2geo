@@ -34,8 +34,8 @@ describe('handler.lookup',() => {
     const suspended_key = uuidv4();
     process.env.VALID_KEY = valid_key;
     process.env.SUSPENDED_KEY = suspended_key;
-    console.log("valid testing API key for this test: " + valid_key);
-    console.log("suspended testing API key for this test: " + suspended_key + "\n\n");
+    console.log("valid API key for this test: " + valid_key);
+    console.log("suspended API key for this test: " + suspended_key + "\n\n");
 
     process.env.MODE = config.MODE;
     process.env.IP2GEO_KEYSPACE = config.IP2GEO_KEYSPACE;
@@ -50,7 +50,6 @@ describe('handler.lookup',() => {
     process.env.NEW_ACCOUNT_EMAIL_REPLYTO = config.NEW_ACCOUNT_EMAIL_REPLYTO;
     process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID = config.NEW_ACCOUNT_EMAIL_TEMPLATE_ID;
     process.env.STRIPE_PRIVATE_KEY = config.STRIPE_PRIVATE_KEY;
-
 
 
     it('setup', (done) => {
@@ -458,12 +457,11 @@ describe('handler.lookup',() => {
             done();
         });
     });
-
      */
 
-
+    // TODO: assign unique testid to each test run, and delete only the data for the testid
     /*
-    it('cleanup', (done) => {
+     it('cleanup', (done) => {
         test_setup.cleanup(function (err) {
             expect(err).to.be.null;
             done();

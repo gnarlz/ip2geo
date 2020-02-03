@@ -6,32 +6,32 @@ const AWS = require('aws-sdk');
 
 module.exports.mvp =  (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
-    subscribe(event, process.env.STRIPE_MVP_PLAN, 'mvp_001', callback);
+    subscribe(event, process.env.STRIPE_MVP_PLAN,  callback);
 };
 
 module.exports.bootstrap =  (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
-    subscribe(event, process.env.STRIPE_BOOTSTRAP_PLAN, 'bootstrap_001', callback);
+    subscribe(event, process.env.STRIPE_BOOTSTRAP_PLAN,  callback);
 };
 
 module.exports.startup =  (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
-    subscribe(event, process.env.STRIPE_STARTUP_PLAN, 'startup_001', callback);
+    subscribe(event, process.env.STRIPE_STARTUP_PLAN,  callback);
 };
 
 module.exports.growth =  (event, context, callback) => {
     context.callbackWaitsForEmptyEventLoop = false;
-    subscribe(event, process.env.STRIPE_GROWTH_PLAN, 'growth_001', callback);
+    subscribe(event, process.env.STRIPE_GROWTH_PLAN,  callback);
 };
 
 
 
-function subscribe(event, planID, plan_name, callback){
+function subscribe(event, planID, callback){
     let params = new URLSearchParams(event.body);
 
     let subscription_data = {};
     subscription_data.planID = planID;
-    subscription_data.plan_name = plan_name;
+    subscription_data.plan_name = params.get("plan_name");
     subscription_data.stripeToken = params.get("stripeToken");
     subscription_data.stripeEmail = params.get("stripeEmail");
 

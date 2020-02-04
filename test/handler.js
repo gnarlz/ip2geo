@@ -44,17 +44,13 @@ describe('handler.lookup',() => {
     process.env.SOURCE_IP = config.SOURCE_IP;
     process.env.IPV4_IP = config.IPV4_IP;
     process.env.IPV6_IP = config.IPV6_IP;
-    process.env.SENDGRID_API_KEY = config.SENDGRID_API_KEY;
-    process.env.NEW_ACCOUNT_EMAIL_CC = config.NEW_ACCOUNT_EMAIL_CC;
-    process.env.NEW_ACCOUNT_EMAIL_BCC = config.NEW_ACCOUNT_EMAIL_BCC;
-    process.env.NEW_ACCOUNT_EMAIL_FROM = config.NEW_ACCOUNT_EMAIL_FROM;
-    process.env.NEW_ACCOUNT_EMAIL_REPLYTO = config.NEW_ACCOUNT_EMAIL_REPLYTO;
-    process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID = config.NEW_ACCOUNT_EMAIL_TEMPLATE_ID;
     process.env.STRIPE_PRIVATE_KEY = config.STRIPE_PRIVATE_KEY;
     process.env.STRIPE_MVP_PLAN = config.STRIPE_MVP_PLAN;
     process.env.STRIPE_BOOTSTRAP_PLAN = config.STRIPE_BOOTSTRAP_PLAN;
     process.env.STRIPE_STARTUP_PLAN = config.STRIPE_STARTUP_PLAN;
     process.env.STRIPE_GROWTH_PLAN = config.STRIPE_GROWTH_PLAN;
+    process.env.POSTMARK_API_KEY = config.POSTMARK_API_KEY;
+    process.env.CREATE_ACCOUNT_SNS_TOPIC = config.CREATE_ACCOUNT_SNS_TOPIC;
 
 
     it('setup', (done) => {

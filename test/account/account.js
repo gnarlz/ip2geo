@@ -8,7 +8,6 @@ const uuidv4 = require('uuid/v4');
 describe('account.create test',() => {
 
 
-
     it('empty subscription_id should return error with code 400', (done) => {
         const context = {
             "awsRequestId": uuidv4()
@@ -215,6 +214,8 @@ describe('account.create test',() => {
 
 
 
+
+
     it('valid invocation - account should be created', (done) => {
         const context = {
             "awsRequestId": uuidv4()
@@ -236,7 +237,7 @@ describe('account.create test',() => {
             expect(data.statusCode).to.equal(200);
             done();
         });
-    });
+    }).timeout(10000); // DAMN THAT S3 ACCESS IS SLOW
 
 });
 

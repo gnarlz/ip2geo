@@ -5,9 +5,9 @@ const redis_client = require('../redis/redis-client');
 const postgres_client = require('../postgres/postgres-client');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
-const sgMail = require('@sendgrid/mail');
 let AWS = require('aws-sdk');
 const plans = require('./plans');
+const emailer = require('../email/emailer');
 
 
 /*
@@ -33,7 +33,6 @@ module.exports.create = (event, context, callback) => {
 
     context.callbackWaitsForEmptyEventLoop = false;
     AWS.config.region = process.env.IP2GEO_AWS_REGION;
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const response = {};
     response.headers = {"Access-Control-Allow-Origin": "*"}; // enable CORS in api gateway when using lambda proxy integration
@@ -178,42 +177,7 @@ module.exports.create = (event, context, callback) => {
             },
 
             function sendNewSubscriberEmail(callback) {
-
-                // TODO: all this string building should be externalized
-                let name_details = "You have subscribed to the " + account_data.display_name + " plan.";
-                let limit_details = " This key is allowed " + Number(account_data.limit).toLocaleString() + " requests a month." ;
-
-                let ratelimit_details;
-                if ((account_data.ratelimit_max) && (Number(account_data.ratelimit_max) > 0)){
-                    ratelimit_details = " The Free plan is rate limited to " + account_data.ratelimit_max + " requests per minute.";
-                }
-                else {
-                    ratelimit_details = "";
-                }
-                let plan_details = name_details.concat(limit_details, ratelimit_details);
-
-                const msg = {
-                    to: account_data.email,
-                    cc: process.env.NEW_ACCOUNT_EMAIL_CC,
-                    bcc: [process.env.NEW_ACCOUNT_EMAIL_BC],
-                    from: process.env.NEW_ACCOUNT_EMAIL_FROM,
-                    replyTo: process.env.NEW_ACCOUNT_EMAIL_REPLYTO,
-                    templateId: process.env.NEW_ACCOUNT_EMAIL_TEMPLATE_ID,
-                    dynamicTemplateData: {
-                        "fname": "",
-                        "key": account_data.key,
-                        "plan_details": plan_details
-                    }
-                };
-
-                sgMail.send(msg).then(() => {
-                    console.log('SENDGRID: Mail sent successfully');
-                    callback(null);
-                }).catch(error => {
-                    console.error('SENDGRID ERROR: ' + error.toString());
-                    return callback(error);
-                });
-
+                emailer.sendNewSubscriberEmail(account_data, callback);
             }
         ],
         function (err, results) {
@@ -234,6 +198,27 @@ module.exports.create = (event, context, callback) => {
             }
 
 
+            // send text and email to admin via sns topic with success/failure and details of new subscription details
+            let sns = new AWS.SNS();
+            let params = {
+                Message: JSON.stringify(account_data),
+                TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
+            };
+            sns.publish(params, function(sns_err, data) {
+                if(sns_err){
+                    console.error("problem publishing to sns topic in account.create: " + sns_err.toString());
+                    // intentionally throw this error on the floor - its annoying but not life threatening
+                }
+
+                if(err){
+                    callback(err, response);
+                }
+                else{
+                    callback(null, response);
+                }
+            });
+
+            /*
             if( process.env.MODE === 'test'){
                 if(err){
                     callback(err, response);
@@ -261,7 +246,15 @@ module.exports.create = (event, context, callback) => {
                         callback(null, response);
                     }
                 });
+
+
             }
+             */
+
+
+
+
+
 
         }
     );

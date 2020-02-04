@@ -7,13 +7,15 @@ const uuidv4 = require('uuid/v4');
 
 describe('subscribe.subscribe test',() => {
 
+
     it('subscribe.mvp successful invocation', (done) => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
             // "body":"plan_name=mvp_001&stripeToken=tok_1G6wBhHBCttsueh1spS3nd4S&stripeTokenType=card&stripeEmail=166%40telematic.io"
-            body: "plan_name=mvp_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=mvp-test%40telematic.io",
+           // body: "plan_name=mvp_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=mvp-test%40ip2geo.co",
+            body: "plan_name=mvp_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=mvp-test%40ip2geo.co",
             requestContext: {
                 identity: {
                     sourceIp: process.env.SOURCE_IP
@@ -26,14 +28,15 @@ describe('subscribe.subscribe test',() => {
             expect(data.headers.Location).to.equal("https://www.ip2geo.co/subscribed.html");
             done();
         });
-    }).timeout(5000);  // stripe is kinda slow
+    }).timeout(10000);  // 3 stripe calls + 2 S3 calls === slow
+
 
     it('subscribe.bootstrap successful invocation', (done) => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
-            body: "plan_name=bootstrap_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=bootstrap-test%40telematic.io",
+            body: "plan_name=bootstrap_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=bootstrap-test%40ip2geo.co",
             requestContext: {
                 identity: {
                     sourceIp: process.env.SOURCE_IP
@@ -46,7 +49,7 @@ describe('subscribe.subscribe test',() => {
             expect(data.headers.Location).to.equal("https://www.ip2geo.co/subscribed.html");
             done();
         });
-    }).timeout(5000);  // stripe is kinda slow
+    }).timeout(10000);  // stripe is kinda slow
 
 
     it('subscribe.startup successful invocation', (done) => {
@@ -54,7 +57,7 @@ describe('subscribe.subscribe test',() => {
             "awsRequestId": uuidv4()
         };
         const event = {
-            body: "plan_name=startup_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=startup-test%40telematic.io",
+            body: "plan_name=startup_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=startup-test%40ip2geo.co",
             requestContext: {
                 identity: {
                     sourceIp: process.env.SOURCE_IP
@@ -67,14 +70,14 @@ describe('subscribe.subscribe test',() => {
             expect(data.headers.Location).to.equal("https://www.ip2geo.co/subscribed.html");
             done();
         });
-    }).timeout(5000);  // stripe is kinda slow
+    }).timeout(10000);  // stripe is kinda slow
 
     it('subscribe.growth successful invocation', (done) => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
-            body: "plan_name=growth_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=growth-test%40telematic.io",
+            body: "plan_name=growth_001&stripeToken=tok_visa&stripeTokenType=card&stripeEmail=growth-test%40ip2geo.co",
             requestContext: {
                 identity: {
                     sourceIp: process.env.SOURCE_IP
@@ -87,7 +90,11 @@ describe('subscribe.subscribe test',() => {
             expect(data.headers.Location).to.equal("https://www.ip2geo.co/subscribed.html");
             done();
         });
-    }).timeout(5000);  // stripe is kinda slow
+    }).timeout(10000);  // stripe is kinda slow
+
+
+
+
 
 });
 

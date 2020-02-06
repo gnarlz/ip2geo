@@ -218,44 +218,6 @@ module.exports.create = (event, context, callback) => {
                 }
             });
 
-            /*
-            if( process.env.MODE === 'test'){
-                if(err){
-                    callback(err, response);
-                }
-                else{
-                    callback(null, response);
-                }
-            } else{
-                // send text and email to admin via sns topic with success/failure and details of new subscription details
-                let sns = new AWS.SNS();
-                let params = {
-                    Message: JSON.stringify(account_data),
-                    TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
-                };
-                sns.publish(params, function(sns_err, data) {
-                    if(sns_err){
-                        console.error("problem publishing to sns topic in account.create: " + sns_err.toString());
-                        // intentionally throw this error on the floor - its annoying but not life threatening
-                    }
-
-                    if(err){
-                        callback(err, response);
-                    }
-                    else{
-                        callback(null, response);
-                    }
-                });
-
-
-            }
-             */
-
-
-
-
-
-
         }
     );
 

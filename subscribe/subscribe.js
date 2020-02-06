@@ -27,18 +27,38 @@ module.exports.growth =  (event, context, callback) => {
 
 
 function subscribe(event, planID, callback){
-    let params = new URLSearchParams(event.body);
-
-    let subscription_data = {};
-    subscription_data.planID = planID;
-    subscription_data.plan_name = params.get("plan_name");
-    subscription_data.stripeToken = params.get("stripeToken");
-    subscription_data.stripeEmail = params.get("stripeEmail");
 
     const response = {};
     response.headers = {"Access-Control-Allow-Origin": "*"}; // enable CORS in api gateway when using lambda proxy integration
 
-    createPaymentMethod(subscription_data, response, callback);
+    let subscription_data = {};
+    subscription_data.planID = planID;
+
+    let params;
+
+    if((( event.body == null)) || (event.body === '')) {  // == test is true for both null and 'undefined'
+        console.error("error in subscribe - null or empty event.body");
+        sendErrorResponse(response, callback);
+    }
+    else{
+        params = new URLSearchParams(event.body);
+        if((( params.get("plan_name") == null)) || (params.get("plan_name") === '')){
+            console.error("error in subscribe - null or empty plan_name");
+            sendErrorResponse(response, callback);
+        }else if((( params.get("stripeToken") == null)) || (params.get("stripeToken") === '')){
+            console.error("error in subscribe - null or empty stripeToken");
+            sendErrorResponse(response, callback);
+        } else if((( params.get("stripeEmail") == null )) || (params.get("stripeEmail") === '')){
+            console.error("error in subscribe - null or empty stripeEmail");
+            sendErrorResponse(response, callback);
+        }
+        else{
+            subscription_data.plan_name = params.get("plan_name");
+            subscription_data.stripeToken = params.get("stripeToken");
+            subscription_data.stripeEmail = params.get("stripeEmail");
+            createPaymentMethod(subscription_data, response, callback);
+        }
+    }
 }
 
 

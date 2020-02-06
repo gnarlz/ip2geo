@@ -26,6 +26,7 @@ if(!process.env.VALID_KEY) {
     process.env.STRIPE_GROWTH_PLAN = config.STRIPE_GROWTH_PLAN;
     process.env.POSTMARK_API_KEY = config.POSTMARK_API_KEY;
     process.env.CREATE_ACCOUNT_SNS_TOPIC = config.CREATE_ACCOUNT_SNS_TOPIC;
+    process.env.CREATE_ACCOUNT_FUNCTION_NAME = config.CREATE_ACCOUNT_FUNCTION_NAME;
     process.env.AWS_SDK_LOAD_CONFIG = true; // tells aws sdk to load region from ~/.aws/config and credentials from ~/.aws/credentials
 
     setup.run( function (err) {

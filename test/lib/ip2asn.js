@@ -1,7 +1,9 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const ip2asn = require('../../lib/ip2asn');
+
 
 describe('ip2asn.lookup test',() => {
 
@@ -43,6 +45,7 @@ describe('ip2asn.lookup test',() => {
         ip2asn.lookup(process.env.IPV4_IP, function (err, data) {
             // {"asn":"20115","organization":"CHARTER-NET-HKY-NC - Charter Communications"}
             expect(err).to.equal(null);
+            console.log("JSON.stringify(data): " + JSON.stringify(data));
             expect(data.asn).to.equal('20115');
             expect(data.organization).to.equal('CHARTER-NET-HKY-NC - Charter Communications');
             done();

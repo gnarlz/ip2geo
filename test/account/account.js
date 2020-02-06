@@ -1,5 +1,6 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const account = require('../../account/account');
 const uuidv4 = require('uuid/v4');
@@ -238,6 +239,8 @@ describe('account.create test',() => {
             done();
         });
     }).timeout(10000); // DAMN THAT S3 ACCESS IS SLOW
+
+
 
 });
 

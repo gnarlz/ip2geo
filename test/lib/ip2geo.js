@@ -1,7 +1,9 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const ip2geo = require('../../lib/ip2geo');
+
 
 describe('ip2geo.lookup test',() => {
 
@@ -42,6 +44,8 @@ describe('ip2geo.lookup test',() => {
     it('valid ipv4 invocation', (done) => {
         ip2geo.lookup(process.env.IPV4_IP, function (err, data) {
             expect(err).to.equal(null);
+
+            console.log("JSON.stringify(data): " + JSON.stringify(data));
             expect(data.ip).to.equal(process.env.IPV4_IP);
             expect(data.latitude).to.equal(43.0334);
             expect(data.longitude).to.equal(-89.4512);

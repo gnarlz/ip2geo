@@ -1,7 +1,9 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const parse = require('../../lib/parse');
+
 
 describe('parse.args test',() => {
 
@@ -20,6 +22,7 @@ describe('parse.args test',() => {
 
         parse.args(event, function(err, data) {
             expect(err).to.be.null;
+            console.log("JSON.stringify(data): " + JSON.stringify(data));
             expect(data).to.be.an('array').to.have.lengthOf(2).to.eql(['8.8.8.8', process.env.VALID_KEY]);
             done();
         });
@@ -63,6 +66,7 @@ describe('parse.args test',() => {
         };
         parse.args(event, function(err, data) {
             expect(err).to.be.null;
+            console.log("JSON.stringify(data): " + JSON.stringify(data));
             expect(data).to.be.an('array').to.have.lengthOf(2).to.eql([process.env.IPV4_IP, process.env.VALID_KEY]);
             done();
         });

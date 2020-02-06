@@ -1,5 +1,6 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const assert  = require("chai").assert;
 const ip = require('../../lib/ip');

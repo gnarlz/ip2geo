@@ -1,7 +1,9 @@
 'use strict'
 
+const config = require('../config');
 const expect  = require("chai").expect;
 const validate = require('../../lib/validate');
+
 
 describe('validate.ip test',() => {
 

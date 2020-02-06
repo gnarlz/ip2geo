@@ -1,10 +1,9 @@
 'use strict'
 
+const config = require('./config');
 const expect  = require("chai").expect;
 const handler = require('../handler');
-const test_setup = require('./lib/setup');
 const uuidv4 = require('uuid/v4');
-const config = require('./config.json');
 
 describe('handler.lookup',() => {
 
@@ -23,42 +22,13 @@ describe('handler.lookup',() => {
     empty ip parameter in query string
     invalid ip parameter (i.e. foo) in query string
     invalid ip parameter (i.e. 333.333.333.333) in query string
-
     valid ipv4 ip parameter in query string
-    //TODO: revisit - redis-mock is not working correctly for zrangebyscore for BIG INTs
-    X valid ipv6 ip parameter in query string
+    X valid ipv6 ip parameter in query string //TODO: revisit - redis-mock is not working correctly for zrangebyscore for BIG INTs
 
     */
 
-    const valid_key = uuidv4();
-    const suspended_key = uuidv4();
-    process.env.VALID_KEY = valid_key;
-    process.env.SUSPENDED_KEY = suspended_key;
-    console.log("valid API key for this test: " + valid_key);
-    console.log("suspended API key for this test: " + suspended_key + "\n\n");
-
-    process.env.MODE = config.MODE;
-    process.env.IP2GEO_AWS_REGION = config.IP2GEO_AWS_REGION;
-    process.env.IP2GEO_KEYSPACE = config.IP2GEO_KEYSPACE;
-    process.env.IP2ASN_KEYSPACE = config.IP2ASN_KEYSPACE;
-    process.env.SOURCE_IP = config.SOURCE_IP;
-    process.env.IPV4_IP = config.IPV4_IP;
-    process.env.IPV6_IP = config.IPV6_IP;
-    process.env.STRIPE_PRIVATE_KEY = config.STRIPE_PRIVATE_KEY;
-    process.env.STRIPE_MVP_PLAN = config.STRIPE_MVP_PLAN;
-    process.env.STRIPE_BOOTSTRAP_PLAN = config.STRIPE_BOOTSTRAP_PLAN;
-    process.env.STRIPE_STARTUP_PLAN = config.STRIPE_STARTUP_PLAN;
-    process.env.STRIPE_GROWTH_PLAN = config.STRIPE_GROWTH_PLAN;
-    process.env.POSTMARK_API_KEY = config.POSTMARK_API_KEY;
-    process.env.CREATE_ACCOUNT_SNS_TOPIC = config.CREATE_ACCOUNT_SNS_TOPIC;
-
-
-    it('setup', (done) => {
-        test_setup.run( function (err) {
-            expect(err).to.be.null;
-            done();
-        });
-    });
+    const valid_key = process.env.VALID_KEY;
+    const suspended_key = process.env.SUSPENDED_KEY;
 
 
     it('no key parameter in query string should return valid response with statusCode 400 and error.message value', (done) => {

@@ -131,7 +131,7 @@ function createAccount(subscription_data, response, callback){
     // TODO: convert this to step functions
     let lambda = new AWS.Lambda();
     let params = {
-        FunctionName: 'ip2geo-v1-account-create',
+        FunctionName: process.env.CREATE_ACCOUNT_FUNCTION_NAME,
         InvocationType: 'RequestResponse',
         LogType: 'Tail',
         Payload:  JSON.stringify(subscription_data)

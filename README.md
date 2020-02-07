@@ -110,7 +110,7 @@ Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-rate
 Subscriptions and recurring payments are implemented using [Stripe](https://github.com/stripe/stripe-node).
 
 ### Subscriber Email
-Subscriber email is implemented by [Sendgrid](https://github.com/sendgrid/sendgrid-nodejs/tree/master/packages/mail).
+Subscriber email is implemented by [Postmark](https://postmarkapp.com/loves/node).
 
 
 ## Shoutouts 

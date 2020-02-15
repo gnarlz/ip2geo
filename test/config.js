@@ -12,7 +12,6 @@ if(!process.env.VALID_KEY) {
     console.log("valid API key for this test: " + process.env.VALID_KEY);
     console.log("suspended API key for this test: " + process.env.SUSPENDED_KEY + "\n\n");
 
-    process.env.MODE = config.MODE;
     process.env.IP2GEO_AWS_REGION = config.IP2GEO_AWS_REGION;
     process.env.IP2GEO_KEYSPACE = config.IP2GEO_KEYSPACE;
     process.env.IP2ASN_KEYSPACE = config.IP2ASN_KEYSPACE;

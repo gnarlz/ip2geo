@@ -29,7 +29,13 @@ module.exports.growth =  (event, context, callback) => {
 function subscribe(event, planID, callback){
 
     const response = {};
-    response.headers = {"Access-Control-Allow-Origin": "*"}; // enable CORS in api gateway when using lambda proxy integration
+    // enable CORS in api gateway when using lambda proxy integration
+    response.headers = {
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+    };
 
     let subscription_data = {};
     subscription_data.planID = planID;

@@ -16,13 +16,14 @@ account.create:
 CURRENT:    invoked by stripe overlay POSTing to subscribe/subscribe.js
 DEPRECATED: invoked by a webhook POST request from recurly to webhooks/recurly.js
 
+    validates data
     creates new key (uuid)
     inserts row into postgres key.account
     inserts row into postgres key.request
     inserts row into postgres key.limit
     inserts row into postgres key.authorization
     inserts "row" authorized:key into redis
-    uses sendgrid to email new subscriber with API key and documentation links
+    uses postmark to email new subscriber with API key and documentation links
     sends sms text to admin with success/failure details of the new subscription
 */
 
@@ -35,7 +36,6 @@ module.exports.create = (event, context, callback) => {
     AWS.config.region = process.env.IP2GEO_AWS_REGION;
 
     const response = {};
-
     const account_data = {};
 
     async.waterfall(
@@ -270,7 +270,13 @@ module.exports.display = (event, context, callback) => {
     let authorized_last_updated_date;
 
     const response = {};
-    response.headers = {"Access-Control-Allow-Origin": "*"};    // enable CORS in api gateway when using lambda proxy integration
+    // enable CORS in api gateway when using lambda proxy integration
+    response.headers = {
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
+    };
 
     async.waterfall(
         [

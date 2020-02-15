@@ -36,10 +36,10 @@ module.exports.lookup = (event, context, callback) => {
     const response = {};
     // enable CORS in api gateway when using lambda proxy integration
     response.headers = {
+        "X-Requested-With": "*",
+        "Access-Control-Allow-Headers": "*",
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Request-Method": "*",
-        "Access-Control-Allow-Methods": "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "*"
+        "Access-Control-Allow-Methods": "GET,POST,OPTIONS"
     };
 
     async.waterfall(
@@ -194,8 +194,6 @@ module.exports.lookup = (event, context, callback) => {
                 callback(null, response);
             });
 
-
-            //callback(null, response);
 
         }
     );

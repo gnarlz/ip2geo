@@ -35,7 +35,6 @@ module.exports.create = (event, context, callback) => {
     AWS.config.region = process.env.IP2GEO_AWS_REGION;
 
     const response = {};
-    response.headers = {"Access-Control-Allow-Origin": "*"}; // enable CORS in api gateway when using lambda proxy integration
 
     const account_data = {};
 

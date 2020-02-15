@@ -59,17 +59,22 @@ provider:
 package:
   include:
     - account/**
+    - email/**
     - lib/**
     - postgres/**
     - redis/**
     - scheduled/**
     - subscribe/**
     - utility/**
-    - webhooks/**
   exclude:
-    - tools/**
-    - notes
     - safe/**
+    - test/**
+    - tools/**
+    - git-notes
+    - ip2geo-postgres.sql
+    - notes
+    - README.md
+    - sensitive
 
 
 functions:

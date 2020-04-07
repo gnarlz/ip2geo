@@ -8,7 +8,7 @@ const ip2geo  = require('./lib/ip2geo');
 const ip2asn  = require('./lib/ip2asn');
 const moment = require('moment');
 
-module.exports.lookup = (event, context, callback) => {
+module.exports.lookup = (event, context) => {
     return new Promise((resolve, reject) => {
         const start = new Date();
         const payload = {};

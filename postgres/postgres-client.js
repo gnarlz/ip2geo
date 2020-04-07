@@ -14,7 +14,7 @@ client.connect(err => {
     if (err) {
         console.error('postgres connection error', err.stack);
     } else {
-        console.log('postgres connected');
+        console.log('postgres client - connected');
     }
 });
 

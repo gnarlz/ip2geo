@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@sendgrid/mail": "^6.4.0",
     "async": "^3.0.1",
     "aws-sdk": "^2.563.0",
     "big-integer": "^1.6.45",
@@ -26,9 +25,7 @@
     "postmark": "^2.3.5",
     "ratelimiter": "^3.4.0",
     "redis": "^2.8.0",
-    "redis-mock": "^0.47.0",
     "request": "^2.88.0",
-    "serverless-plugin-warmup": "^4.7.1-rc.1",
     "stripe": "^7.15.0",
     "uuid": "^3.3.2",
     "uuid-validate": "0.0.3",

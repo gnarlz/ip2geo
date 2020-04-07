@@ -7,64 +7,55 @@ const ip2asn = require('../../lib/ip2asn');
 
 describe('ip2asn.lookup test',() => {
 
-    it('null ip should return error', (done) => {
-        ip2asn.lookup(null, function (err, data) {
-            expect(data).to.be.an.instanceOf(Error).with.property('message', "ip2asn.lookup - no asn data for ip = null");
-            expect(data).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
+    it('null ip should return error', () => {
+        return  ip2asn.lookup(null)
+            .catch((error) => {
+                expect(error).to.be.an.instanceOf(Error).with.property('message', 'ip2asn.lookup - no asn data for ip = null');
+                expect(error).to.be.an.instanceOf(Error).with.property('code', 400);
+            })
+    });
+    it('empty ip should return error', () => {
+        return  ip2asn.lookup("")
+            .catch((error) => {
+                expect(error).to.be.an.instanceOf(Error).with.property('message', 'ip2asn.lookup - no asn data for ip = ');
+                expect(error).to.be.an.instanceOf(Error).with.property('code', 400);
+            })
+    });
+    it('invalid ipv4 should return error', () => {
+        return  ip2asn.lookup("100.200.300.400")
+            .catch((error) => {
+                expect(error).to.be.an.instanceOf(Error).with.property('message', 'ip2asn.lookup - no asn data for ip = 100.200.300.400');
+                expect(error).to.be.an.instanceOf(Error).with.property('code', 400);
+            })
+    });
+    it('invalid ipv6 should return error', () => {
+        return  ip2asn.lookup("2001:200:1c0:2000:0:0:0:X")
+            .catch((error) => {
+                expect(error).to.be.an.instanceOf(Error).with.property('message', 'ip2asn.lookup - no asn data for ip = 2001:200:1c0:2000:0:0:0:X');
+                expect(error).to.be.an.instanceOf(Error).with.property('code', 400);
+            })
     });
 
-    it('empty ip should return error', (done) => {
-        ip2asn.lookup("", function (err, data) {
-            expect(data).to.be.an.instanceOf(Error).with.property('message', "ip2asn.lookup - no asn data for ip = ");
-            expect(data).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
+    it('valid ipv4 invocation', () => {
+        return  ip2asn.lookup(process.env.IPV4_IP)
+            .then((data) => {
+                //console.log("valid ipv4: " + JSON.stringify(data));
+                // valid ipv4: {"asn":"20115","organization":"CHARTER-NET-HKY-NC - Charter Communications"}
+                expect(data).to.be.not.null;
+                expect(data.asn).to.equal("20115");
+                expect(data.organization).to.equal("CHARTER-NET-HKY-NC - Charter Communications");
+            })
     });
-
-    it('invalid ipv4 ip should return error', (done) => {
-        ip2asn.lookup("100.200.300.400", function (err, data) {
-            expect(data).to.be.an.instanceOf(Error).with.property('message', "ip2asn.lookup - no asn data for ip = 100.200.300.400");
-            expect(data).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
+    it('valid ipv6 invocation', () => {
+        return  ip2asn.lookup(process.env.IPV6_IP)
+            .then((data) => {
+                //console.log("valid ipv6: " + JSON.stringify(data));
+                // valid ipv6: {"asn":"2500","organization":"WIDE-BB WIDE Project"}
+                expect(data).to.be.not.null;
+                expect(data.asn).to.equal("2500");
+                expect(data.organization).to.equal("WIDE-BB WIDE Project");
+            })
     });
-
-    it('invalid ipv4 ip should return error', (done) => {
-        ip2asn.lookup("2001:200:1c0:2000:0:0:0:X", function (err, data) {
-            //console.log("data: " + JSON.stringify(data));
-            expect(data).to.be.an.instanceOf(Error).with.property('message', "ip2asn.lookup - no asn data for ip = 2001:200:1c0:2000:0:0:0:X");
-            expect(data).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
-
-
-    it('valid ipv4 invocation', (done) => {
-        ip2asn.lookup(process.env.IPV4_IP, function (err, data) {
-            // {"asn":"20115","organization":"CHARTER-NET-HKY-NC - Charter Communications"}
-            expect(err).to.equal(null);
-            console.log("JSON.stringify(data): " + JSON.stringify(data));
-            expect(data.asn).to.equal('20115');
-            expect(data.organization).to.equal('CHARTER-NET-HKY-NC - Charter Communications');
-            done();
-        });
-    });
-
-    //TODO: revisit - redis-mock is not working correctly for zrangebyscore for BIG INTs
-    /*
-    it('valid ipv6 invocation', (done) => {
-        ip2asn.lookup(process.env.IPV6_IP, function (err, data) {
-            expect(err).to.equal(null);
-            expect(data.asn).to.equal('20115');
-            expect(data.organization).to.equal('CHARTER-NET-HKY-NC - Charter Communications');
-            done();
-        });
-     });
-     */
-
-
 
 });
 

@@ -1,6 +1,5 @@
 'use strict';
 
-const async = require('async');
 const validate = require('./lib/validate');
 const authorize = require('./lib/authorize');
 const rateLimiter = require('./lib/rateLimiter');
@@ -11,7 +10,6 @@ const moment = require('moment');
 
 module.exports.lookup = (event, context, callback) => {
     return new Promise((resolve, reject) => {
-        context.callbackWaitsForEmptyEventLoop = false;
         const start = new Date();
         const payload = {};
         const request = {};
@@ -20,13 +18,7 @@ module.exports.lookup = (event, context, callback) => {
         if (!ip) {
             ip = event['requestContext']['identity']['sourceIp'];
         }
-
-        // =============== LOAD TESTING ===============================================
-        // uncomment for quick and dirty load testing
-        // const ipInt = require('ip-to-int');
-        // ip = ipInt(Math.floor(Math.random() * Math.floor(4294967290))).toIP();
-        // key = process.env.VALID_KEY;
-        // =============== LOAD TESTING ===============================================
+        //loadTest(ip, key);   // uncomment for quick and dirty load testing
 
         enrichRequest(request, event, context, ip);
         setResponseHeadersCORS(response);   // enable CORS in api gateway when using lambda proxy integration
@@ -140,4 +132,11 @@ function createSuccessResponse(request, response, payload, geoResult, asnResult,
 
     response.statusCode = 200;
     response.body = JSON.stringify(payload);
+}
+
+
+function loadTest(ip, key){
+    const ipInt = require('ip-to-int');
+    ip = ipInt(Math.floor(Math.random() * Math.floor(4294967290))).toIP();
+    key = process.env.VALID_KEY;
 }

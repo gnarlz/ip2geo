@@ -83,12 +83,6 @@ function createErrorResponse(request, response, payload, err, start){
 
     response.statusCode = err.code;
     response.body = JSON.stringify(payload);
-
-    if(Number(err.code) === 429){  // key exceeded rate limit
-        response.headers["X-RateLimit-Limit"] = err.limit ;
-        response.headers["X-RateLimit-Remaining"] = err.remaining;
-        response.headers["X-RateLimit-Retry-After"] = err.retry;
-    }
 }
 
 function createSuccessResponse(request, response, payload, geoResult, asnResult, start){

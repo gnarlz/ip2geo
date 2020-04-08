@@ -82,13 +82,10 @@ function subscribe(event, planID){
             .catch((error) => {
                 console.log("error creating subscription and account: " + JSON.stringify(subscription_data)
                     + "     error: " + error);
-                createErrorResponse(response);
+                response.statusCode = 301;
+                response.headers["Location"] = 'https://www.ip2geo.co/error.html';
                 resolve(response);
             });
     });
 }
 
-function createErrorResponse(response){
-    response.statusCode = 301;
-    response.headers["Location"] = 'https://www.ip2geo.co/error.html';
-}

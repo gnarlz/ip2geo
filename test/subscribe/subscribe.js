@@ -192,7 +192,7 @@ describe('subscribe.subscribe test',() => {
             })
     }).timeout(10000);
 
-    /*
+
     it('subscribe.mvp successful invocation', () => {
         const context = {
             "awsRequestId": uuidv4()
@@ -216,7 +216,7 @@ describe('subscribe.subscribe test',() => {
             })
     }).timeout(10000);
 
-     */
+
 
 
 });

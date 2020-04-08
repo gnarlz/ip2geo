@@ -35,7 +35,7 @@ function subscribe(event, planID){
         subscription_data.planID = planID;
         utilities.setResponseHeadersCORS(response);   // enable CORS in api gateway when using lambda proxy integration
 
-        validate.eventBody(event.body)
+        validate.subscriptionEventBody(event.body)
             .then(() => {
                 const params = new URLSearchParams(event.body);
                 subscription_data.plan_name = params.get("plan_name");

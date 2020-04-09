@@ -41,7 +41,6 @@ function subscribe(event, planID){
                 subscription_data.plan_name = params.get("plan_name");
                 subscription_data.stripeToken = params.get("stripeToken");
                 subscription_data.stripeEmail = params.get("stripeEmail");
-
                 return stripe.paymentMethods.create({
                     type: 'card',
                     card: {token: subscription_data.stripeToken}
@@ -54,7 +53,6 @@ function subscribe(event, planID){
             })
             .then((customer) => {
                 subscription_data.customer_id = customer.id;
-
                 return stripe.subscriptions.create({
                         customer: subscription_data.customer_id,
                         items: [{plan: subscription_data.planID}],
@@ -62,8 +60,8 @@ function subscribe(event, planID){
                     });
             })
             .then((subscription) => {
+                // subscription has been created in stripe - now create the corresponding account on our side
                 subscription_data.subscription_id = subscription.id;
-
                 const lambda = new AWS.Lambda();
                 const params = {
                     FunctionName: process.env.CREATE_ACCOUNT_FUNCTION_NAME,

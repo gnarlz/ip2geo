@@ -9,11 +9,12 @@ const uuidv4 = require('uuid/v4');
 describe('account.create test',() => {
 
 
-    it('empty subscription_id should return error with code 400', (done) => {
+    it('empty subscription_id should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
+            //subscription_id: uuidv4(),
             subscription_id: '',
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
@@ -25,21 +26,22 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            //console.log("account create test - JSON.stringify(data): " + JSON.stringify(data));
-            // {"headers":{"Access-Control-Allow-Origin":"*"},"statusCode":500,"body":"{\"error\":\"Error: null or empty subscription_id\"}"}
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id");
+            })
+    }).timeout(10000);
 
-    it('null subscription_id should return error with code 400', (done) => {
+    it('null subscription_id should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
-            // subscription_id: uuidv4(),
+            //subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
@@ -50,24 +52,24 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id");
+            })
+    }).timeout(10000);
 
 
-
-
-
-
-    it('empty stripeEmail should return error with code 400', (done) => {
+    it('empty stripeEmail should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
             subscription_id: uuidv4(),
+            //stripeEmail: 'test@ip2geo.co',
             stripeEmail: '',
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
@@ -78,16 +80,17 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            //console.log("account create test - JSON.stringify(data): " + JSON.stringify(data));
-            // {"headers":{"Access-Control-Allow-Origin":"*"},"statusCode":500,"body":"{\"error\":\"Error: null or empty subscription_id\"}"}
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail");
+            })
+    }).timeout(10000);
 
-    it('null stripeEmail should return error with code 400', (done) => {
+    it('null stripeEmail should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
@@ -103,24 +106,26 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail");
+            })
+    }).timeout(10000);
 
 
 
-
-
-    it('empty planID should return error with code 400', (done) => {
+    it('empty planID should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
         const event = {
             subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
+            //planID: 'plan_GVK3dbrCJxAEqa',
             planID: '',
             plan_name: 'mvp_001',
             queryStringParameters:{},
@@ -130,16 +135,17 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            //console.log("account create test - JSON.stringify(data): " + JSON.stringify(data));
-            // {"headers":{"Access-Control-Allow-Origin":"*"},"statusCode":500,"body":"{\"error\":\"Error: null or empty subscription_id\"}"}
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty planID");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty planID");
+            })
+    }).timeout(10000);
 
-    it('null planID should return error with code 400', (done) => {
+    it('null planID should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
@@ -155,17 +161,21 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty planID");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty planID");
+            })
+    }).timeout(10000);
 
 
 
 
-    it('empty plan_name should return error with code 400', (done) => {
+
+    it('empty plan_name should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
@@ -173,6 +183,7 @@ describe('account.create test',() => {
             subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
+            //plan_name: 'mvp_001',
             plan_name: '',
             queryStringParameters:{},
             requestContext: {
@@ -181,16 +192,17 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            //console.log("account create test - JSON.stringify(data): " + JSON.stringify(data));
-            // {"headers":{"Access-Control-Allow-Origin":"*"},"statusCode":500,"body":"{\"error\":\"Error: null or empty subscription_id\"}"}
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name");
+            })
+    }).timeout(10000);
 
-    it('null plan_name should return error with code 400', (done) => {
+    it('null plan_name should return error', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
@@ -206,18 +218,18 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            expect(err).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name");
-            expect(err).to.be.an.instanceOf(Error).with.property('code', 400);
-            done();
-        });
-    });
+        return account.create(event, context)
+            .then ((data) => {
+                //expect(data.statusCode).to.equal(200);
+            })
+            .catch((error) => {
+                console.log("error.message: " + error.message);
+                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name");
+            })
+    }).timeout(10000);
 
 
-
-
-
-    it('valid invocation - account should be created', (done) => {
+    it('valid invocation - account should be created', () => {
         const context = {
             "awsRequestId": uuidv4()
         };
@@ -233,11 +245,13 @@ describe('account.create test',() => {
                 }
             },
         };
-        account.create(event, context, function(err, data) {
-            expect(err).to.be.null;
-            expect(data.statusCode).to.equal(200);
-            done();
-        });
+        return account.create(event, context)
+            .then ((data) => {
+                expect(data).to.be.null;
+            })
+            .catch((error) => {
+                console.log("error: " + error);
+            })
     }).timeout(10000); // DAMN THAT S3 ACCESS IS SLOW
 
 

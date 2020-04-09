@@ -1,20 +1,18 @@
 'use strict';
 
-const async = require('async');
-const redis_client = require('../redis/redis-client');
-const postgres_client = require('../postgres/postgres-client');
+const redisClient = require('../redis/redis-client');
+const postgresClient = require('../postgres/postgres-client');
 const moment = require('moment');
 const uuidv4 = require('uuid/v4');
 let AWS = require('aws-sdk');
 const plans = require('./plans');
 const emailer = require('../email/emailer');
-
+const validate = require('../lib/validate');
+const util = require('util');
 
 /*
-
 account.create:
-CURRENT:    invoked by stripe overlay POSTing to subscribe/subscribe.js
-DEPRECATED: invoked by a webhook POST request from recurly to webhooks/recurly.js
+    invoked by a stripe overlay POSTing to subscribe/subscribe.js
 
     validates data
     creates new key (uuid)
@@ -24,209 +22,209 @@ DEPRECATED: invoked by a webhook POST request from recurly to webhooks/recurly.j
     inserts row into postgres key.authorization
     inserts "row" authorized:key into redis
     uses postmark to email new subscriber with API key and documentation links
-    sends sms text to admin with success/failure details of the new subscription
+    publish to sns topic (text and email to admin with success/failure details of the new account creation)
 */
 
-module.exports.create = (event, context, callback) => {
+module.exports.create = (event, context) => {
+    return new Promise((resolve, reject) => {
+        console.log("account.create - start:");
+        console.log("event: " + JSON.stringify(event));
 
-    console.log("account.create - start:");
-    console.log("event: " + JSON.stringify(event));
+        const accountData = {};
+        let subscribed = false;
+        let accountCreationError;
 
-    context.callbackWaitsForEmptyEventLoop = false;
-    AWS.config.region = process.env.IP2GEO_AWS_REGION;
-
-    const response = {};
-    const account_data = {};
-
-    async.waterfall(
-        [
-            function validate(callback){
-                console.log('event.subscription_id: ' + event.subscription_id);
-                if(((typeof event.subscription_id === 'undefined')) || (event.subscription_id === '')){
-                    let error = new Error();
-                    error.message = "null or empty subscription_id";
-                    error.code = 400;
-                    callback(error);
-                }else if(((typeof event.stripeEmail === 'undefined')) || (event.stripeEmail === '')){
-                    let error = new Error();
-                    error.message = "null or empty stripeEmail";
-                    error.code = 400;
-                    callback(error);
-                } else if(((typeof event.planID === 'undefined')) || (event.planID === '')){
-                    let error = new Error();
-                    error.message = "null or empty planID";
-                    error.code = 400;
-                    callback(error);
-                }
-                else if(((typeof event.plan_name === 'undefined')) || (event.plan_name === '')){
-                    let error = new Error();
-                    error.message = "null or empty plan_name";
-                    error.code = 400;
-                    callback(error);
-                }
-                else{
-                    callback (null);
-                }
-            },
-
-            function populateAccountData(callback){
-                account_data.action = "account.create";
-                account_data.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
-                account_data.key = uuidv4();
-                account_data.subscription_id = event.subscription_id;
-                account_data.email = event.stripeEmail;
-                account_data.plan_id = event.planID;
-                account_data.plan_name = event.plan_name;
-
-                account_data.plan_created_at = plans[event.plan_name].created_at;
-                account_data.display_name = plans[event.plan_name].display_name;
-                account_data.limit = plans[event.plan_name].limit;
-                account_data.ratelimit_max = plans[event.plan_name].ratelimit_max;
-                account_data.ratelimit_duration = plans[event.plan_name].ratelimit_duration;
-                account_data.price = plans[event.plan_name].price;
-                console.log("creating account: " + JSON.stringify(account_data));
-                callback(null);
-            },
-
-            function insertPostgresKeyAccount(callback) {
-                postgres_client.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at,updated_at) values ('" +
-                    account_data.key + "', '" +
-                    account_data.subscription_id + "', '" +
-                    account_data.plan_name + "', '" +
-                    account_data.email + "', " +
-                    "true, now(), now())", (error, result) => {
-                    if (error) {
-                        console.error("account.create - error inserting into key.account: " + error);
-                        callback(error);
-                    }
-                    else {
-                        console.log("account.create - inserted row into key.account:     key: " + account_data.key);
-                        callback(null);
-                    }
-                });
-            },
-            function insertPostgresKeyRequest(callback) {
-                postgres_client.query("insert into key.request (key,total,created_at,updated_at) values ('" +
-                    account_data.key + "', 0, now(), now())", (error, result) => {
-                    if (error) {
-                        console.error("account.create - error inserting into key.request: " + error);
-                        callback(error);
-                    }
-                    else {
-                        console.log("account.create - inserted row into key.request:     key: " + account_data.key);
-                        callback(null);
-                    }
-                });
-            },
-            function insertPostgresKeyLimit(callback) {
-                postgres_client.query("insert into key.limit (key,limit_,created_at,updated_at, ratelimit_max, ratelimit_duration) values ('" +
-                    account_data.key + "', " +
-                    account_data.limit + ", now(), now()," +
-                    (account_data.ratelimit_max? account_data.ratelimit_max : null) + ", " +
-                    (account_data.ratelimit_duration? account_data.ratelimit_duration : null) + ")",  (error, result) => {
-                    if (error) {
-                        console.error("account.create - error inserting into key.limit: " + error);
-                        callback(error);
-                    }
-                    else {
-                        console.log("account.create - inserted row into key.limit:     key: " + account_data.key);
-                        callback(null);
-                    }
-                });
-            },
-            function insertPostgresKeyAuthorization(callback) {
-                postgres_client.query("insert into key.authorization (key,authorized,created_at,updated_at, ratelimit_max, ratelimit_duration, message) values ('" +
-                    account_data.key + "', true,  now(), now()," +
-                    (account_data.ratelimit_max? account_data.ratelimit_max : null) + ", " +
-                    (account_data.ratelimit_duration? account_data.ratelimit_duration : null) + ", '" + "Account creation" + "')",  (error, result) => {
-                    if (error) {
-                        console.error("account.create - error inserting into key.authorization: " + error);
-                        callback(error);
-                    }
-                    else {
-                        console.log("account.create - inserted row into key.authorization:     key: " + account_data.key);
-                        callback(null);
-                    }
-                });
-            },
-            function insertRedisAuthorization(callback) {
-                const redis_row = {};
-                redis_row.authorized = true;
-                redis_row.message = 'Account created.';
-                redis_row.ts = account_data.ts;
-                if(account_data.ratelimit_max){
-                    redis_row.ratelimit_max = account_data.ratelimit_max;
-                }
-                if(account_data.ratelimit_duration){
-                    redis_row.ratelimit_duration = account_data.ratelimit_duration;
-                }
-                redis_row.status = "success";
-
-                let akey = "authorized:" + account_data.key;
-                redis_client.set(akey, JSON.stringify(redis_row), function (err, reply) {
-                    if (err) {
-                        console.error("account.create - error attempting to set authorization in redis:      key: " + akey + "        error: " + err);
-                        return callback(err);
-                    }
-                    else{
-                        console.log("account.create - set authorized in redis:     key: " + akey);
-                        callback(null);
-                    }
-                });
-            },
-
-            function sendNewSubscriberEmail(callback) {
-                emailer.sendNewSubscriberEmail(account_data, callback);
-            }
-        ],
-        function (err, results) {
-            if (err) {
-                console.error("account.create - error creating account: " + JSON.stringify(account_data) + "   error: " + err);
-                account_data.status = 'ERROR';
-                account_data.message = err.toString();
-
-                response.statusCode = 500;
-                response.body = JSON.stringify(  {error: err.toString()} );
-            } else {
-                console.log("account.create - successfully created account: " + JSON.stringify(account_data));
-                account_data.status = 'SUCCESS';
-                account_data.message = 'account created';
-
-                response.statusCode = 200;
-                response.body = JSON.stringify(  {key: account_data.key} );
-            }
-
-
-            // send text and email to admin via sns topic with success/failure and details of new subscription details
-            let sns = new AWS.SNS();
-            let params = {
-                Message: JSON.stringify(account_data),
-                TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
-            };
-            sns.publish(params, function(sns_err, data) {
-                if(sns_err){
-                    console.error("problem publishing to sns topic in account.create: " + sns_err.toString());
-                    // intentionally throw this error on the floor - its annoying but not life threatening
+        validate.accountEvent(event)
+            .then(() => {
+                populateAccountData(accountData, event);
+                return  Promise.all([
+                    insertPostgresKeyAccount(accountData),
+                    insertPostgresKeyRequest(accountData),
+                    insertPostgresKeyLimit(accountData),
+                    insertPostgresKeyAuthorization(accountData),
+                    insertRedisAuthorization(accountData)
+                ])
+            })
+            .then(() => {
+                const sendNewSubscriberEmailPromisified = util.promisify(emailer.sendNewSubscriberEmail);
+                return sendNewSubscriberEmailPromisified(accountData);
+            })
+            .then(() => {
+                // success
+                console.log("account.create - successfully created account: " + JSON.stringify(accountData));
+                subscribed = true;
+                accountData.status = 'SUCCESS';
+                accountData.message = 'account created';
+                return sendAccountCreationTextAndEmail(accountData);
+            })
+            .catch((error) => {
+                // error
+                console.error("account.create - error creating account: " + JSON.stringify(accountData) + "   error: " + error);
+                subscribed = false;
+                accountCreationError = error;
+                accountData.status = 'ERROR';
+                accountData.message = error.toString();
+                return sendAccountCreationTextAndEmail(accountData);
+            })
+            .catch((error) => {
+                // ignore
+                console.error("account.create - problem publishing to sns topic for  account: " + JSON.stringify(accountData) + "   error: " + error);
+            })
+            .then(() => {
+                if(subscribed){
+                    resolve(null);
+                } else{
+                    reject(accountCreationError);
                 }
 
-                if(err){
-                    callback(err, response);
-                }
-                else{
-                    callback(null, response);
-                }
-            });
-
-        }
-    );
-
+            })
+    });
 };
 
 
+function populateAccountData(accountData, event){
+    accountData.action = "account.create";
+    accountData.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS');
+    accountData.key = uuidv4();
+    accountData.subscription_id = event.subscription_id;
+    accountData.email = event.stripeEmail;
+    accountData.plan_id = event.planID;
+    accountData.plan_name = event.plan_name;
+
+    accountData.plan_created_at = plans[event.plan_name].created_at;
+    accountData.display_name = plans[event.plan_name].display_name;
+    accountData.limit = plans[event.plan_name].limit;
+    accountData.ratelimit_max = plans[event.plan_name].ratelimit_max;
+    accountData.ratelimit_duration = plans[event.plan_name].ratelimit_duration;
+    accountData.price = plans[event.plan_name].price;
+    console.log("creating account: " + JSON.stringify(accountData));
+}
 
 
 
 
+function insertPostgresKeyAccount(accountData){
+    return new Promise((resolve, reject) => {
+        postgresClient.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at," +
+            " updated_at) values ('" +
+            accountData.key + "', '" +
+            accountData.subscription_id + "', '" +
+            accountData.plan_name + "', '" +
+            accountData.email + "', " +
+            "true, now(), now())")
+            .then(result => {
+                console.log("account.create - inserted row into key.account:     key: " + accountData.key);
+                resolve();
+            })
+            .catch(error => {
+                console.error("account.create - error inserting into key.account: " + error);
+                reject(error);
+            })
+    });
+}
+function insertPostgresKeyRequest(accountData){
+    return new Promise((resolve, reject) => {
+        postgresClient.query("insert into key.request (key,total,created_at,updated_at) values ('" +
+            accountData.key + "', 0, now(), now())")
+            .then(result => {
+                console.log("account.create - inserted row into key.request:     key: " + accountData.key);
+                resolve();
+            })
+            .catch(error => {
+                console.error("account.create - error inserting into key.request: " + error);
+                reject(error);
+            })
+    });
+}
+function insertPostgresKeyLimit(accountData){
+    return new Promise((resolve, reject) => {
+        postgresClient.query("insert into key.limit (key,limit_,created_at,updated_at, ratelimit_max, " +
+            "ratelimit_duration) values ('" +
+            accountData.key + "', " +
+            accountData.limit + ", now(), now()," +
+            (accountData.ratelimit_max? accountData.ratelimit_max : null) + ", " +
+            (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ")")
+            .then(result => {
+                console.log("account.create - inserted row into key.limit:     key: " + accountData.key);
+                resolve();
+            })
+            .catch(error => {
+                console.error("account.create - error inserting into key.limit: " + error);
+                reject(error);
+            })
+    });
+}
+function insertPostgresKeyAuthorization(accountData){
+    return new Promise((resolve, reject) => {
+        postgresClient.query("insert into key.authorization (key,authorized,created_at,updated_at, ratelimit_max, " +
+            "ratelimit_duration, message) values ('" +
+            accountData.key + "', true,  now(), now()," +
+            (accountData.ratelimit_max? accountData.ratelimit_max : null) + ", " +
+            (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ", '" + "Account creation" + "')")
+            .then(result => {
+                console.log("account.create - inserted row into key.authorization:     key: " + accountData.key);
+                resolve();
+            })
+            .catch(error => {
+                console.error("account.create - error inserting into key.authorization: " + error);
+                reject(error);
+            })
+    });
+}
+function insertRedisAuthorization(accountData){
+    return new Promise((resolve, reject) => {
+        const akey = "authorized:" + accountData.key;
+        const redis_row = {};
+        redis_row.authorized = true;
+        redis_row.message = 'Account created.';
+        redis_row.ts = accountData.ts;
+        if(accountData.ratelimit_max){
+            redis_row.ratelimit_max = accountData.ratelimit_max;
+        }
+        if(accountData.ratelimit_duration){
+            redis_row.ratelimit_duration = accountData.ratelimit_duration;
+        }
+        redis_row.status = "success";
+
+        const args = [akey, JSON.stringify(redis_row)];
+        const redisClientSendCommand = util.promisify(redisClient.send_command).bind(redisClient);
+        return redisClientSendCommand('SET', args)
+            .then(() => {
+                console.log("account.create - set authorized in redis:     key: " + akey);
+                resolve();
+            })
+            .catch((error) => {
+                console.error("account.create - error attempting to set authorization in redis:      " +
+                    "key: " + akey + "        error: " + error);
+                reject(error);
+            })
+    });
+}
+
+
+function sendAccountCreationTextAndEmail(accountData){
+    return new Promise((resolve, reject) => {
+        AWS.config.region = process.env.IP2GEO_AWS_REGION;
+
+        const params = {
+            Message: JSON.stringify(accountData),
+            TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
+        };
+        const snsPublishPromise = new AWS.SNS().publish(params).promise();
+
+        snsPublishPromise
+            .then( (data) => {
+                console.log(`Message ${params.Message} send sent to the topic ${params.TopicArn}`);
+                console.log("MessageID is " + data.MessageId);
+                resolve(null);
+            })
+            .catch((error) => {
+                console.error(`account.sendAccountCreationTextAndEmail - failed to send sns:  
+                accountData = ${accountData}      error: ${error}`);
+                resolve(null);  // throw this error on the floor - its annoying but not life threatening
+            })
+    });
+}
 
 
 
@@ -243,6 +241,7 @@ module.exports.create = (event, context, callback) => {
 account.display:
     returns a snapshot of the current status for the account associated with the supplied key
  */
+/*
 
 module.exports.display = (event, context, callback) => {
 
@@ -390,3 +389,4 @@ module.exports.display = (event, context, callback) => {
     );
 };
 
+ */

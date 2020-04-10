@@ -41,6 +41,11 @@ if(!process.env.VALID_KEY) {
     process.env.REDIS_PORT = config.REDIS_PORT;
     process.env.REDIS_PASS = config.REDIS_PASS;
 
+    process.env.HTML_TEMPLATE_BUCKET_NAME = config.HTML_TEMPLATE_BUCKET_NAME;
+    process.env.HTML_TEMPLATE_KEY_NAME = config.HTML_TEMPLATE_KEY_NAME;
+    process.env.TEXT_TEMPLATE_BUCKET_NAME = config.TEXT_TEMPLATE_BUCKET_NAME;
+    process.env.TEXT_TEMPLATE_KEY_NAME = config.TEXT_TEMPLATE_KEY_NAME;
+
     console.log("==========================================================================");
     console.log("valid API key for this test: " + process.env.VALID_KEY);
     console.log("revoked API key for this test: " + process.env.REVOKED_KEY);
@@ -72,6 +77,11 @@ if(!process.env.VALID_KEY) {
     console.log("redis host for this test: " + process.env.REDIS_IP_ADDRESS );
     console.log("redis port for this test: " + process.env.REDIS_PORT );
     console.log("redis pass for this test: " + process.env.REDIS_PASS );
+
+    console.log("s3 html template bucket name for this test: " + process.env.HTML_TEMPLATE_BUCKET_NAME );
+    console.log("s3 html template key name for this test: " + process.env.HTML_TEMPLATE_KEY_NAME );
+    console.log("s3 text template bucket name for this test: " + process.env.TEXT_TEMPLATE_BUCKET_NAME );
+    console.log("s3 text template key name for this test: " + process.env.TEXT_TEMPLATE_KEY_NAME );
 
     console.log("==========================================================================");
 

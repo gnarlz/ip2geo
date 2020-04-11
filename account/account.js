@@ -27,8 +27,7 @@ account.create:
 
 module.exports.create = (event, context) => {
     return new Promise((resolve, reject) => {
-        console.log("account.create - start:");
-        console.log("event: " + JSON.stringify(event));
+        console.log("account.create - event: " + JSON.stringify(event));
 
         const accountData = {};
         let subscribed = false;
@@ -46,8 +45,7 @@ module.exports.create = (event, context) => {
                 ])
             })
             .then(() => {
-                const sendNewSubscriberEmailPromisified = util.promisify(emailer.sendNewSubscriberEmail);
-                return sendNewSubscriberEmailPromisified(accountData);
+                return emailer.sendNewSubscriberEmail(accountData);
             })
             .then(() => {
                 // success
@@ -205,7 +203,6 @@ function insertRedisAuthorization(accountData){
 function sendAccountCreationTextAndEmail(accountData){
     return new Promise((resolve, reject) => {
         AWS.config.region = process.env.IP2GEO_AWS_REGION;
-
         const params = {
             Message: JSON.stringify(accountData),
             TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,

@@ -6,7 +6,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
   stage: v1
   region: us-east-1
   logs:   # enables api gateway to write logs to cloudwatch
@@ -55,6 +55,11 @@ provider:
 
     POSTMARK_API_KEY: XXX
 
+    HTML_TEMPLATE_BUCKET_NAME: XXX
+    HTML_TEMPLATE_KEY_NAME: XXX
+    TEXT_TEMPLATE_BUCKET_NAME: XXX
+    TEXT_TEMPLATE_KEY_NAME: XXX
+
 
 package:
   include:
@@ -70,12 +75,7 @@ package:
     - safe/**
     - test/**
     - tools/**
-    - git-notes
-    - ip2geo-postgres.sql
-    - notes
     - README.md
-    - sensitive
-
 
 functions:
   lookup:
@@ -154,15 +154,3 @@ functions:
               method: get
               cors: true
         environment:
-
-  # ---------------------------------------------------------------------------
-  # ----------------------------------  DEPRECATED  ---------------------------
-  # ---------------------------------------------------------------------------
-  #webhooks-recurly:
-  #      handler: webhooks/recurly.notification
-  #      memorySize: 256
-  #      events:
-  #        - http:
-  #            path: notifications/recurly
-  #            method: post
-  #            cors: true

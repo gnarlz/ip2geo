@@ -1,0 +1,156 @@
+
+service: ip2geo
+
+plugins:
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: v1
+  region: us-east-1
+  logs:   # enables api gateway to write logs to cloudwatch
+    restApi: true
+  #apiVersion: v1
+
+  iamRoleStatements:  # add permissions to the Lambda functions' IAM Role
+    - Effect: "Allow"
+      Action:
+        - "sns:*"
+      Resource: "*"
+
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:InvokeFunction'
+      Resource: "*"
+
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource: "*"
+
+  environment:
+    IP2GEO_AWS_REGION: XXX
+    CREATE_ACCOUNT_SNS_TOPIC: XXX
+    CREATE_ACCOUNT_FUNCTION_NAME: XXX
+
+    IP2GEO_KEYSPACE:  XXX
+    IP2ASN_KEYSPACE: XXX
+
+    REDIS_IP_ADDRESS: XXX
+    REDIS_PORT: XXX
+    REDIS_PASS: XXX
+
+    POSTGRES_HOST: XXX
+    POSTGRES_USER: XXX
+    POSTGRES_PASS: XXX
+    POSTGRES_PORT: XXX
+    POSTGRES_DB: XXX
+
+    STRIPE_PRIVATE_KEY: XXX
+    STRIPE_MVP_PLAN: XXX
+    STRIPE_BOOTSTRAP_PLAN: XXX
+    STRIPE_STARTUP_PLAN: XXX
+    STRIPE_GROWTH_PLAN: XXX
+
+    POSTMARK_API_KEY: XXX
+
+    HTML_TEMPLATE_BUCKET_NAME: XXX
+    HTML_TEMPLATE_KEY_NAME: XXX
+    TEXT_TEMPLATE_BUCKET_NAME: XXX
+    TEXT_TEMPLATE_KEY_NAME: XXX
+
+
+package:
+  include:
+    - account/**
+    - email/**
+    - lib/**
+    - postgres/**
+    - redis/**
+    - scheduled/**
+    - subscribe/**
+    - utility/**
+  exclude:
+    - safe/**
+    - test/**
+    - tools/**
+    - README.md
+
+functions:
+  lookup:
+      handler: handler.lookup
+      memorySize: 512
+      events:
+        - http:
+            path: ip2geo
+            method: get
+            cors: true
+      reservedConcurrency: 100
+
+  authorized:
+      handler: scheduled/authorized.run
+      memorySize: 256
+      events:
+        - schedule: rate(60 minutes)
+
+  sync:
+        handler: scheduled/sync.run
+        memorySize: 256
+        events:
+          - schedule: rate(60 minutes)
+
+  subscribe-mvp:
+        handler: subscribe/subscribe.mvp
+        memorySize: 256
+        events:
+          - http:
+              path: subscribe/mvp
+              method: post
+              cors: true
+
+  subscribe-bootstrap:
+          handler: subscribe/subscribe.bootstrap
+          memorySize: 256
+          events:
+            - http:
+                path: subscribe/bootstrap
+                method: post
+                cors: true
+
+  subscribe-startup:
+          handler: subscribe/subscribe.startup
+          memorySize: 256
+          events:
+            - http:
+                path: subscribe/startup
+                method: post
+                cors: true
+
+  subscribe-growth:
+          handler: subscribe/subscribe.growth
+          memorySize: 256
+          events:
+            - http:
+                path: subscribe/growth
+                method: post
+                cors: true
+
+  account-create:
+        handler: account/account.create
+        memorySize: 256
+        events:
+          - http:
+              path: account/create
+              method: post
+              cors: true
+
+  account-display:
+        handler: account/account.display
+        memorySize: 256
+        events:
+          - http:
+              path: account/display
+              method: get
+              cors: true
+        environment:

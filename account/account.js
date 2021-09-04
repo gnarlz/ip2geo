@@ -18,21 +18,35 @@ const {
 } = require('./helper')
 
 
-/*
-account.create:
-    invoked by a stripe overlay POSTing to subscribe/subscribe.js
-
-    validates data
-    creates new key (uuid)
-    inserts row into postgres key.account
-    inserts row into postgres key.request
-    inserts row into postgres key.limit
-    inserts row into postgres key.authorization
-    inserts "row" authorized:key into redis
-    uses postmark to email new subscriber with API key and documentation links
-    publish to sns topic (text and email to admin with success/failure details of the new account creation)
-*/
-
+/**
+ * Creates an ip2geo account.
+ * Invoked by a stripe overlay POSTing to subscribe/subscribe.js
+ * Implementation Details:
+ *      Validates data
+ *      Creates new key (uuid)
+ *      Inserts row into postgres key.account
+ *      Inserts row into postgres key.request
+ *      Inserts row into postgres key.limit
+ *      Inserts row into postgres key.authorization
+ *      Inserts "row" authorized:key into redis
+ *      Calls Postmark to email new subscriber with API key and documentation links
+ *      Publish to sns topic (text and email to admin with success/failure details of the new account creation)
+ * 
+ * @param {Object} event 
+ * @param {String} event.subscription_id 
+ * @param {String} event.stripeEmail 
+ * @param {String} event.planID 
+ * @param {String} event.plan_name 
+ * @param {Object} event.queryStringParameters 
+ * @param {Object} event.requestContext 
+ * @param {Object} event.requestContext.identity
+ * @param {String} event.requestContext.identity.sourceIp
+ * @param {Array} [event.headers]
+ * @param {Object} context 
+ * @param {String} context.awsRequestId 
+ * @return {Object} Well formed JSON response containing information on whether the accout creation was successful or not.
+ * @public
+ */
 module.exports.create = async (event, context) => {
     const start = new Date()
     const request = {}

@@ -10,11 +10,8 @@
     "text-summary",
     "lcov"
   ],
-  "include": [
-    "lib/**/*.js"
-  ],
   "exclude": [
-    "foo/bar.js"
+    "test/**/*.js"
   ],
   "cache": true,
   "clean": true

@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 // this is obviously AWFUL TODO: put this in postgres where it belongs
 const plans = {
@@ -40,4 +40,4 @@ const plans = {
         }
 };
 
-module.exports = plans;
+module.exports = plans

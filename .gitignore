@@ -18,4 +18,5 @@ node_modules
 jspm_packages
 tools
 safe
+coverage/
 

@@ -54,7 +54,7 @@ function createErrorResponse(request, response, payload, err, start){
     payload.error = {message: err.message};
 
     response.statusCode = err.code;
-    response.body = JSON.stringify(payload);
+    response.body = payload
 }
 
 function createSuccessResponse(request, response, payload, geoResult, asnResult, start){
@@ -97,7 +97,7 @@ function createSuccessResponse(request, response, payload, geoResult, asnResult,
     payload.isp = isp;
 
     response.statusCode = 200;
-    response.body = JSON.stringify(payload);
+    response.body = payload
 }
 
 

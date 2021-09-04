@@ -1,14 +1,22 @@
 'use strict'
 
-const redisClient = require('../redis/redis-client')
-const postgresClient = require('../postgres/postgres-client')
 const moment = require('moment')
 const uuidv4 = require('uuid/v4')
-let AWS = require('aws-sdk')
+const http = require('http-codes')
+const winston = require('winston')
+const logger = winston.createLogger({transports: [new winston.transports.Console()]})
+
+
 const plans = require('./plans')
+const errors = require('../lib/errors')
+const utilities  = require('../utility/utilities')
 const emailer = require('../email/emailer')
-const validate = require('../lib/validate')
-const util = require('util')
+const validate = require('./validate')
+const {
+    insertPostgresKeyAccount,insertPostgresKeyRequest, insertPostgresKeyLimit,
+    insertPostgresKeyAuthorization,insertRedisAuthorization,sendAccountCreationTextAndEmail
+} = require('./helper')
+
 
 /*
 account.create:
@@ -25,62 +33,56 @@ account.create:
     publish to sns topic (text and email to admin with success/failure details of the new account creation)
 */
 
-module.exports.create = (event, context) => {
-    return new Promise((resolve, reject) => {
-        console.log("account.create - event: " + JSON.stringify(event))
+module.exports.create = async (event, context) => {
+    const start = new Date()
+    const request = {}
+    const requestId = context.awsRequestId
+   
+    utilities.enrichRequest(request, event, context)
 
-        const accountData = {}
-        let subscribed = false
-        let accountCreationError
-
+    try {
         validate.accountEvent(event)
-            .then(() => {
-                populateAccountData(accountData, event)
-                return  Promise.all([
-                    insertPostgresKeyAccount(accountData),
-                    insertPostgresKeyRequest(accountData),
-                    insertPostgresKeyLimit(accountData),
-                    insertPostgresKeyAuthorization(accountData),
-                    insertRedisAuthorization(accountData)
-                ])
-            })
-            .then(() => {
-                return emailer.sendNewSubscriberEmail(accountData)
-            })
-            .then(() => {
-                // success
-                console.log("account.create - successfully created account: " + JSON.stringify(accountData))
-                subscribed = true
-                accountData.status = 'SUCCESS'
-                accountData.message = 'account created'
-                return sendAccountCreationTextAndEmail(accountData)
-            })
-            .catch((error) => {
-                // error
-                console.error("account.create - error creating account: " + JSON.stringify(accountData) + "   error: " + error)
-                subscribed = false
-                accountCreationError = error
-                accountData.status = 'ERROR'
-                accountData.message = error.toString()
-                return sendAccountCreationTextAndEmail(accountData)
-            })
-            .catch((error) => {
-                // ignore
-                console.error("account.create - problem publishing to sns topic for  account: " + JSON.stringify(accountData) + "   error: " + error)
-            })
-            .then(() => {
-                if(subscribed){
-                    resolve(null)
-                } else{
-                    reject(accountCreationError)
-                }
+    } catch (error) {
+        logger.log({requestId, level: 'error',message: `account.create - validation error: ${error}`})
+        return createErrorResponse(request, start)
+    }
+    
+    const accountData = populateAccountData(event)
+    logger.log({requestId, level: 'info', message: `account.create - accountData: ${JSON.stringify(accountData)}`})
 
-            })
+    return Promise.all([
+        insertPostgresKeyAccount(accountData, requestId),
+        insertPostgresKeyRequest(accountData, requestId),
+        insertPostgresKeyLimit(accountData, requestId),
+        insertPostgresKeyAuthorization(accountData, requestId),
+        insertRedisAuthorization(accountData, requestId)
+    ])
+    .then(() => {
+        return emailer.sendNewSubscriberEmail(accountData, requestId)
+    })
+    .then(() => {
+        accountData.status = 'SUCCESS'
+        accountData.message = 'account created'
+        logger.log({requestId, level: 'info', message: `account.create - successfully created account: ${JSON.stringify(accountData)}`})
+        return
+    })
+    .catch((error) => {
+        accountData.status = 'FAILURE'
+        accountData.message = `account not created - error: ${error}`
+        logger.log({requestId, level: 'error',  message: `account.create - error creating account: ${JSON.stringify(accountData)}`})
+        return error
+    })
+    .then((error) => {
+        sendAccountCreationTextAndEmail(accountData, requestId) 
+
+        if (error) return createErrorResponse(request, start)
+        return createSuccessResponse(request, start)
     })
 }
 
 
-function populateAccountData(accountData, event){
+const populateAccountData = (event) => {
+    const accountData = {}
     accountData.action = "account.create"
     accountData.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS')
     accountData.key = uuidv4()
@@ -88,151 +90,50 @@ function populateAccountData(accountData, event){
     accountData.email = event.stripeEmail
     accountData.plan_id = event.planID
     accountData.plan_name = event.plan_name
-
     accountData.plan_created_at = plans[event.plan_name].created_at
     accountData.display_name = plans[event.plan_name].display_name
     accountData.limit = plans[event.plan_name].limit
     accountData.ratelimit_max = plans[event.plan_name].ratelimit_max
     accountData.ratelimit_duration = plans[event.plan_name].ratelimit_duration
     accountData.price = plans[event.plan_name].price
-    console.log("creating account: " + JSON.stringify(accountData))
+    return accountData
 }
 
 
+const createErrorResponse = (request, start) => {
+    const response = {}
+    utilities.setResponseHeadersCORS(response)    // enable CORS in api gateway when using lambda proxy integration
 
+    const payload = {}
+    payload.time_elapsed = new Date() - start
+    payload.status = "error"
+    payload.status_code = http.INTERNAL_SERVER_ERROR
+    payload.request = request
+    payload.error = {
+        message: errors.ACCOUNT_CREATION_UNSUCCESSFUL, 
+        code: http.INTERNAL_SERVER_ERROR
+    }
 
-function insertPostgresKeyAccount(accountData){
-    return new Promise((resolve, reject) => {
-        postgresClient.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at," +
-            " updated_at) values ('" +
-            accountData.key + "', '" +
-            accountData.subscription_id + "', '" +
-            accountData.plan_name + "', '" +
-            accountData.email + "', " +
-            "true, now(), now())")
-            .then(result => {
-                console.log("account.create - inserted row into key.account:     key: " + accountData.key)
-                resolve()
-            })
-            .catch(error => {
-                console.error("account.create - error inserting into key.account: " + error)
-                reject(error)
-            })
-    })
-}
-function insertPostgresKeyRequest(accountData){
-    return new Promise((resolve, reject) => {
-        postgresClient.query("insert into key.request (key,total,created_at,updated_at) values ('" +
-            accountData.key + "', 0, now(), now())")
-            .then(result => {
-                console.log("account.create - inserted row into key.request:     key: " + accountData.key)
-                resolve()
-            })
-            .catch(error => {
-                console.error("account.create - error inserting into key.request: " + error)
-                reject(error)
-            })
-    })
-}
-function insertPostgresKeyLimit(accountData){
-    return new Promise((resolve, reject) => {
-        postgresClient.query("insert into key.limit (key,limit_,created_at,updated_at, ratelimit_max, " +
-            "ratelimit_duration) values ('" +
-            accountData.key + "', " +
-            accountData.limit + ", now(), now()," +
-            (accountData.ratelimit_max? accountData.ratelimit_max : null) + ", " +
-            (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ")")
-            .then(result => {
-                console.log("account.create - inserted row into key.limit:     key: " + accountData.key)
-                resolve()
-            })
-            .catch(error => {
-                console.error("account.create - error inserting into key.limit: " + error)
-                reject(error)
-            })
-    })
-}
-function insertPostgresKeyAuthorization(accountData){
-    return new Promise((resolve, reject) => {
-        postgresClient.query("insert into key.authorization (key,authorized,created_at,updated_at, ratelimit_max, " +
-            "ratelimit_duration, message) values ('" +
-            accountData.key + "', true,  now(), now()," +
-            (accountData.ratelimit_max? accountData.ratelimit_max : null) + ", " +
-            (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ", '" + "Account creation" + "')")
-            .then(result => {
-                console.log("account.create - inserted row into key.authorization:     key: " + accountData.key)
-                resolve()
-            })
-            .catch(error => {
-                console.error("account.create - error inserting into key.authorization: " + error)
-                reject(error)
-            })
-    })
-}
-function insertRedisAuthorization(accountData){
-    return new Promise((resolve, reject) => {
-        const akey = "authorized:" + accountData.key
-        const redis_row = {}
-        redis_row.authorized = true
-        redis_row.message = 'Account created.'
-        redis_row.ts = accountData.ts
-        if(accountData.ratelimit_max){
-            redis_row.ratelimit_max = accountData.ratelimit_max
-        }
-        if(accountData.ratelimit_duration){
-            redis_row.ratelimit_duration = accountData.ratelimit_duration
-        }
-        redis_row.status = "success"
-
-        const args = [akey, JSON.stringify(redis_row)]
-        const redisClientSendCommand = util.promisify(redisClient.send_command).bind(redisClient)
-        return redisClientSendCommand('SET', args)
-            .then(() => {
-                console.log("account.create - set authorized in redis:     key: " + akey)
-                resolve()
-            })
-            .catch((error) => {
-                console.error("account.create - error attempting to set authorization in redis:      " +
-                    "key: " + akey + "        error: " + error)
-                reject(error)
-            })
-    })
+    response.statusCode = http.INTERNAL_SERVER_ERROR
+    response.body = payload
+    return response
 }
 
 
-function sendAccountCreationTextAndEmail(accountData){
-    return new Promise((resolve, reject) => {
-        AWS.config.region = process.env.IP2GEO_AWS_REGION
-        const params = {
-            Message: JSON.stringify(accountData),
-            TopicArn: process.env.CREATE_ACCOUNT_SNS_TOPIC,
-        }
-        const snsPublishPromise = new AWS.SNS().publish(params).promise()
+const createSuccessResponse = (request, start) =>{
+    const response = {}
+    utilities.setResponseHeadersCORS(response)    // enable CORS in api gateway when using lambda proxy integration
 
-        snsPublishPromise
-            .then( (data) => {
-                console.log(`Message ${params.Message} send sent to the topic ${params.TopicArn}`)
-                console.log("MessageID is " + data.MessageId)
-                resolve(null)
-            })
-            .catch((error) => {
-                console.error(`account.sendAccountCreationTextAndEmail - failed to send sns:  
-                accountData = ${accountData}      error: ${error}`)
-                resolve(null)  // throw this error on the floor - its annoying but not life threatening
-            })
-    })
+    const payload = {}
+    payload.time_elapsed = new Date() - start
+    payload.status = "success"
+    payload.status_code = http.OK
+    payload.request = request
+
+    response.statusCode = http.OK
+    response.body = payload
+    return response
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 account.display:

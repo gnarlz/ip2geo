@@ -4,31 +4,92 @@
 const expect  = require("chai").expect
 const account = require('../../../account/account')
 const uuidv4 = require('uuid/v4')
+const proxyquire = require('proxyquire')
 
+const unit = (fns) => {
+    return proxyquire('../../../account/account', {
+        './helper': {
+            insertPostgresKeyAccount: fns.insertPostgresKeyAccount || (it => it),
+            insertPostgresKeyRequest: fns.insertPostgresKeyRequest || (it => it),
+            insertPostgresKeyLimit: fns.insertPostgresKeyLimit || (it => it),
+            insertPostgresKeyAuthorization: fns.insertPostgresKeyAuthorization || (it => it),
+            insertRedisAuthorization: fns.insertRedisAuthorization || (it => it),
+            sendAccountCreationTextAndEmail: fns.sendAccountCreationTextAndEmail || (it => it)
+          },
+          '../email/emailer': {
+            sendNewSubscriberEmail: fns.sendNewSubscriberEmail || (it => it)
+          }
+  })
+}
 
-
-// TODO: need to proxyrequire in  ../../../account/account
-// redis
-// postgres,
-// insertPostgresKeyAccount(accountData),
-// insertPostgresKeyRequest(accountData),
-// insertPostgresKeyLimit(accountData),
-// insertPostgresKeyAuthorization(accountData),
-// insertRedisAuthorization(accountData)
-// emailer.sendNewSubscriberEmail
-
-
-// TODO: RESUME - start to proxyrequire everything
-
-
-
-describe('account.create test',() => {
-    it.only('empty subscription_id should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
+const validContext = {"awsRequestId": uuidv4()}
+const validEvent = {
+    subscription_id: uuidv4(),
+    stripeEmail: 'test@ip2geo.co',
+    planID: 'plan_GVK3dbrCJxAEqa',
+    plan_name: 'mvp_001',
+    queryStringParameters:{},
+    requestContext: {
+        identity: {
+            sourceIp: process.env.SOURCE_IP
         }
+    },
+    headers: []
+}
+
+const validateErrorResponse = (response) => {
+    // console.log(`$$$$$$$ response: ${JSON.stringify(response,null,2)}`)
+    expect(response).to.be.ok
+    expect(response.body).to.be.ok
+    expect(response.body.status).to.equal('error')
+    expect(response.body.status_code).to.equal(500)
+    expect(response.body.error).to.be.ok
+    expect(response.body.error.message).to.equal('ACCOUNT_CREATION_UNSUCCESSFUL')
+    expect(response.body.error.code).to.equal(500)
+}
+const validateSuccessResponse = (response) => {
+    // console.log(`$$$$$$$ response: ${JSON.stringify(response,null,2)}`)
+    expect(response).to.be.ok
+    expect(response.body).to.be.ok
+    expect(response.body.status).to.equal('success')
+    expect(response.body.status_code).to.equal(200)
+}
+
+describe.only('account.create test',() => {
+
+    it('should return well formed error response when error is thrown by validation (null event)', () => {
+        const context = { "awsRequestId": uuidv4()}  
+        return account.create(null,context)
+        .then (response => validateErrorResponse(response))
+           
+    })
+    it('should return well formed error response when error is thrown by validation (empty event)', () => {
+        const context = { "awsRequestId": uuidv4()}  
+        const event = {}
+        return account.create(event,context)
+        .then (response => validateErrorResponse(response))
+    })
+
+    it('should return well formed error response when error is thrown by validation (null subscription_id)', () => {
+        const context = { "awsRequestId": uuidv4()}
         const event = {
-            //subscription_id: uuidv4(),
+            stripeEmail: 'test@ip2geo.co',
+            planID: 'plan_GVK3dbrCJxAEqa',
+            plan_name: 'mvp_001',
+            queryStringParameters:{},
+            requestContext: {
+                identity: {
+                    sourceIp: process.env.SOURCE_IP
+                }
+            },
+            headers: []
+        }
+        return account.create(event, context)
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by validation (empty subscription_id)', () => {
+        const context = { "awsRequestId": uuidv4()}
+        const event = {
             subscription_id: '',
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
@@ -39,25 +100,16 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-                throw new Error('EXPECTED ERROR BUT NONE WAS THROWN')
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id")
-            })
-    }).timeout(10000)
-
-    it('null subscription_id should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
+        .then (response => validateErrorResponse(response))
+    })
+  
+    it('should return well formed error response when error is thrown by validation (null stripeEail)', () => {
+        const context = {"awsRequestId": uuidv4()}
         const event = {
-            //subscription_id: uuidv4(),
-            stripeEmail: 'test@ip2geo.co',
+            subscription_id: uuidv4(),
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
             queryStringParameters:{},
@@ -66,25 +118,15 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty subscription_id")
-            })
-    }).timeout(10000)
-
-
-    it('empty stripeEmail should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by validation (empty stripeEail)', () => {
+        const context = {"awsRequestId": uuidv4()}
         const event = {
             subscription_id: uuidv4(),
-            //stripeEmail: 'test@ip2geo.co',
             stripeEmail: '',
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
@@ -94,25 +136,17 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail")
-            })
-    }).timeout(10000)
+        .then (response => validateErrorResponse(response))
+    })
 
-    it('null stripeEmail should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
+    it('should return well formed error response when error is thrown by validation (null planID)', () => {
+        const context = { "awsRequestId": uuidv4()}
         const event = {
             subscription_id: uuidv4(),
-            //stripeEmail: 'test@ip2geo.co',
-            planID: 'plan_GVK3dbrCJxAEqa',
+            stripeEmail: 'test@ip2geo.co',
             plan_name: 'mvp_001',
             queryStringParameters:{},
             requestContext: {
@@ -120,27 +154,18 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty stripeEmail")
-            })
-    }).timeout(10000)
-
-
-
-    it('empty planID should return error', () => {
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by validation (empty planID)', () => {
         const context = {
             "awsRequestId": uuidv4()
         }
         const event = {
             subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
-            //planID: 'plan_GVK3dbrCJxAEqa',
             planID: '',
             plan_name: 'mvp_001',
             queryStringParameters:{},
@@ -149,56 +174,35 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty planID")
-            })
-    }).timeout(10000)
+        .then (response => validateErrorResponse(response))
+    })
 
-    it('null planID should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
+    it('should return well formed error response when error is thrown by validation (null plan_name)', () => {
+        const context = {"awsRequestId": uuidv4()}
         const event = {
             subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
-            //planID: 'plan_GVK3dbrCJxAEqa',
-            plan_name: 'mvp_001',
+            planID: 'plan_GVK3dbrCJxAEqa',
             queryStringParameters:{},
             requestContext: {
                 identity: {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty planID")
-            })
-    }).timeout(10000)
-
-
-
-
-
-    it('empty plan_name should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by validation (empty plan_name)', () => {
+        const context = {"awsRequestId": uuidv4()}
         const event = {
             subscription_id: uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
-            //plan_name: 'mvp_001',
             plan_name: '',
             queryStringParameters:{},
             requestContext: {
@@ -206,70 +210,240 @@ describe('account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
+            headers: []
         }
         return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name")
-            })
-    }).timeout(10000)
+        .then (response => validateErrorResponse(response))
+    })
 
-    it('null plan_name should return error', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
-        const event = {
-            subscription_id: uuidv4(),
-            stripeEmail: 'test@ip2geo.co',
-            planID: 'plan_GVK3dbrCJxAEqa',
-            //plan_name: 'mvp_001',
-            queryStringParameters:{},
-            requestContext: {
-                identity: {
-                    sourceIp: process.env.SOURCE_IP
-                }
+    it('should return well formed error response when error is thrown by insertPostgresKeyAccount()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               throw new Error('insertPostgresKeyAccount error')
             },
-        }
-        return account.create(event, context)
-            .then ((data) => {
-                //expect(data.statusCode).to.equal(200)
-            })
-            .catch((error) => {
-                console.log("error.message: " + error.message)
-                expect(error).to.be.an.instanceOf(Error).with.property('message', "null or empty plan_name")
-            })
-    }).timeout(10000)
-
-
-    it('valid invocation - account should be created', () => {
-        const context = {
-            "awsRequestId": uuidv4()
-        }
-        const event = {
-            subscription_id: uuidv4(),
-            stripeEmail: 'test@ip2geo.co',
-            planID: 'plan_GVK3dbrCJxAEqa',
-            plan_name: 'mvp_001',
-            queryStringParameters:{},
-            requestContext: {
-                identity: {
-                    sourceIp: process.env.SOURCE_IP
-                }
+            insertPostgresKeyRequest: async ({data}) => {
+               return
             },
-        }
-        return account.create(event, context)
-            .then ((data) => {
-                expect(data).to.be.null
-            })
-            .catch((error) => {
-                console.log("error: " + error)
-            })
-    }).timeout(10000) // DAMN THAT S3 ACCESS IS SLOW
+            insertPostgresKeyLimit: async ({data}) => {
+                return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
 
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by insertPostgresKeyRequest()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+                throw new Error('insertPostgresKeyRequest error')
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+                return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
 
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by insertPostgresKeyLimit()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+               return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+                throw new Error('insertPostgresKeyLimit error')
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+    it('should return well formed error response when error is thrown by insertPostgresKeyAuthorization()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+               return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+               return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                throw new Error('insertPostgresKeyAuthorization error')
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+
+    it('should return well formed error response when error is thrown by insertRedisAuthorization()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+               return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+               return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+               return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                throw new Error('insertRedisAuthorization error')
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
+        
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+
+    it('should return well formed error response when error is thrown by sendNewSubscriberEmail()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+               return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+               return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+               return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+               return
+            },
+            insertRedisAuthorization: async ({data}) => {
+               return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                throw new Error('sendNewSubscriberEmail error')
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return 
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateErrorResponse(response))
+    })
+
+    it('should return well formed success response when error is thrown by sendAccountCreationTextAndEmail()', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+                return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+                return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+                return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                throw new Error('sendAccountCreationTextAndEmail error')
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateSuccessResponse(response))
+    })
+
+    it('should return well formed success response when valid invocation - account should be created', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async ({data}) => {
+                return
+            },
+            insertPostgresKeyRequest: async ({data}) => {
+                return
+            },
+            insertPostgresKeyLimit: async ({data}) => {
+                return
+            },
+            insertPostgresKeyAuthorization: async ({data}) => {
+                return
+            },
+            insertRedisAuthorization: async ({data}) => {
+                return
+            },
+            sendNewSubscriberEmail: async ({data}) => {
+                return
+            },
+            sendAccountCreationTextAndEmail: async ({data}) => {
+                return
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateSuccessResponse(response))
+    })
 
 })
 

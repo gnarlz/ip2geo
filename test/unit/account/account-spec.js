@@ -222,22 +222,22 @@ describe('account.create test',() => {
                throw new Error('insertPostgresKeyAccount error')
             },
             insertPostgresKeyRequest: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyLimit: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-                return
+                return null
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
 
@@ -247,25 +247,25 @@ describe('account.create test',() => {
     it('should return well formed error response when error is thrown by insertPostgresKeyRequest()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyRequest: async (data) => {
                 throw new Error('insertPostgresKeyRequest error')
             },
             insertPostgresKeyLimit: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-                return
+                return null
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
 
@@ -275,25 +275,25 @@ describe('account.create test',() => {
     it('should return well formed error response when error is thrown by insertPostgresKeyLimit()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyRequest: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyLimit: async (data) => {
                 throw new Error('insertPostgresKeyLimit error')
             },
             insertPostgresKeyAuthorization: async (data) => {
-                return
+                return null
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
 
@@ -303,25 +303,25 @@ describe('account.create test',() => {
     it('should return well formed error response when error is thrown by insertPostgresKeyAuthorization()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyRequest: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyLimit: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyAuthorization: async (data) => {
                 throw new Error('insertPostgresKeyAuthorization error')
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
 
@@ -332,83 +332,167 @@ describe('account.create test',() => {
     it('should return well formed error response when error is thrown by insertRedisAuthorization()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyRequest: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyLimit: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-               return
+               return null
             },
             insertRedisAuthorization: async (data) => {
                 throw new Error('insertRedisAuthorization error')
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
         
         return accountProxy.create(validEvent, validContext)
         .then (response => validateErrorResponse(response))
     })
+    it('should return well formed success response when insertRedisAuthorization() is successful', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async (data) => {
+               return null
+            },
+            insertPostgresKeyRequest: async (data) => {
+               return null
+            },
+            insertPostgresKeyLimit: async (data) => {
+               return null
+            },
+            insertPostgresKeyAuthorization: async (data) => {
+               return null
+            },
+            insertRedisAuthorization: async (data) => {
+                return null
+            },
+            sendNewSubscriberEmail: async (data) => {
+                return null
+            },
+            sendAccountCreationTextAndEmail: async (data) => {
+                return null
+            }
+        })
+        
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateSuccessResponse(response))
+    })
 
     it('should return well formed error response when error is thrown by sendNewSubscriberEmail()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyRequest: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyLimit: async (data) => {
-               return
+               return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-               return
+               return null
             },
             insertRedisAuthorization: async (data) => {
-               return
+               return null
             },
             sendNewSubscriberEmail: async (data) => {
                 throw new Error('sendNewSubscriberEmail error')
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return 
+                return  null
             }
         })
 
         return accountProxy.create(validEvent, validContext)
         .then (response => validateErrorResponse(response))
     })
+    it('should return well formed success response when sendNewSubscriberEmail() is successful', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async (data) => {
+               return null
+            },
+            insertPostgresKeyRequest: async (data) => {
+               return null
+            },
+            insertPostgresKeyLimit: async (data) => {
+               return null
+            },
+            insertPostgresKeyAuthorization: async (data) => {
+               return null
+            },
+            insertRedisAuthorization: async (data) => {
+               return null
+            },
+            sendNewSubscriberEmail: async (data) => {
+                return null
+            },
+            sendAccountCreationTextAndEmail: async (data) => {
+                return null
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateSuccessResponse(response))
+    })
 
     it('should return well formed success response when error is thrown by sendAccountCreationTextAndEmail()', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyRequest: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyLimit: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-                return
+                return null
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
                 throw new Error('sendAccountCreationTextAndEmail error')
+            }
+        })
+
+        return accountProxy.create(validEvent, validContext)
+        .then (response => validateSuccessResponse(response))
+    })
+    it('should return well formed success response when sendAccountCreationTextAndEmail() is successsful', () => {
+        const accountProxy = unit({
+            insertPostgresKeyAccount: async (data) => {
+                return null
+            },
+            insertPostgresKeyRequest: async (data) => {
+                return null
+            },
+            insertPostgresKeyLimit: async (data) => {
+                return null
+            },
+            insertPostgresKeyAuthorization: async (data) => {
+                return null
+            },
+            insertRedisAuthorization: async (data) => {
+                return null
+            },
+            sendNewSubscriberEmail: async (data) => {
+                return null
+            },
+            sendAccountCreationTextAndEmail: async (data) => {
+                return null
             }
         })
 
@@ -419,25 +503,25 @@ describe('account.create test',() => {
     it('should return well formed success response when valid invocation - account should be created', () => {
         const accountProxy = unit({
             insertPostgresKeyAccount: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyRequest: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyLimit: async (data) => {
-                return
+                return null
             },
             insertPostgresKeyAuthorization: async (data) => {
-                return
+                return null
             },
             insertRedisAuthorization: async (data) => {
-                return
+                return null
             },
             sendNewSubscriberEmail: async (data) => {
-                return
+                return null
             },
             sendAccountCreationTextAndEmail: async (data) => {
-                return
+                return null
             }
         })
 

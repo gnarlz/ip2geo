@@ -1,7 +1,5 @@
 'use strict'
 
-const isIp = require('is-ip')
-const uuidValidate = require('uuid-validate')
 const errors = require('../lib/errors')
 const _ = {
     cloneDeep: require('lodash.clonedeep'),

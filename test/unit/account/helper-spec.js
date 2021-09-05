@@ -123,7 +123,7 @@ describe('account helper test',() => {
 
     it('should return null when query() is successful in insertPostgresKeyAccount()', () => {
         const helperProxy = unit({
-            query: async (data) => {return}
+            query: async (data) => {return null}
         })
 
         return helperProxy.insertPostgresKeyAccount(validAccountData, 'requestId-12345')
@@ -134,7 +134,7 @@ describe('account helper test',() => {
     })
     it('should return null when query() is successful in insertPostgresKeyRequest()', () => {
         const helperProxy = unit({
-            query: async (data) => {return}
+            query: async (data) => {return null}
         })
 
         return helperProxy.insertPostgresKeyRequest(validAccountData, 'requestId-12345')
@@ -144,7 +144,7 @@ describe('account helper test',() => {
     })
     it('should return null when query() is successful in insertPostgresKeyLimit()', () => {
         const helperProxy = unit({
-            query: async (data) => {return}
+            query: async (data) => {return null}
         })
 
         return helperProxy.insertPostgresKeyLimit(validAccountData, 'requestId-12345')
@@ -154,7 +154,7 @@ describe('account helper test',() => {
     })
     it('should return null when query() is successful in insertPostgresKeyAuthorization()', () => {
         const helperProxy = unit({
-            query: async (data) => {return}
+            query: async (data) => {return null}
         })
 
         return helperProxy.insertPostgresKeyAuthorization(validAccountData, 'requestId-12345')

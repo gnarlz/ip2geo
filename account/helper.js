@@ -103,7 +103,6 @@ module.exports = {
         })
     },
     
-    
     sendAccountCreationTextAndEmail: async (accountData, requestId) => {
         AWS.config.region = process.env.IP2GEO_AWS_REGION
         const params = {

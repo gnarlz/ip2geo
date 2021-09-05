@@ -32,18 +32,18 @@ const {
  *      Calls Postmark to email new subscriber with API key and documentation links
  *      Publish to sns topic (text and email to admin with success/failure details of the new account creation)
  * 
- * @param {Object} event 
- * @param {String} event.subscription_id 
- * @param {String} event.stripeEmail 
- * @param {String} event.planID 
- * @param {String} event.plan_name 
- * @param {Object} event.queryStringParameters 
- * @param {Object} event.requestContext 
- * @param {Object} event.requestContext.identity
- * @param {String} event.requestContext.identity.sourceIp
- * @param {Array} [event.headers]
- * @param {Object} context 
- * @param {String} context.awsRequestId 
+ * @param {Object} event (required)
+ * @param {String} event.subscription_id (required)
+ * @param {String} event.stripeEmail (required)
+ * @param {String} event.planID (required)
+ * @param {String} event.plan_name (required)
+ * @param {Object} event.queryStringParameters (required)
+ * @param {Object} event.requestContext (required)
+ * @param {Object} event.requestContext.identity (required)
+ * @param {String} event.requestContext.identity.sourceIp (required)
+ * @param {Array} [event.headers] (required)
+ * @param {Object} context (required)
+ * @param {String} context.awsRequestId (required)
  * @return {Object} Well formed JSON response containing information on whether the accout creation was successful or not.
  * @public
  */

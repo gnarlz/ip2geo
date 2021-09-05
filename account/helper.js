@@ -8,15 +8,11 @@ const redisClient = require('../redis/redis-client')
 const postgresClient = require('../postgres/postgres-client')
 let AWS = require('aws-sdk')
 
-
-
-
-
 module.exports = {
    
-    insertPostgresKeyAccount: (accountData) => {
+    insertPostgresKeyAccount: async (accountData, requestId) => {
         // TODO: refactotor with sql as tokens
-        postgresClient.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at," +
+        return postgresClient.query("insert into key.account (key, subscription_id, plan_id, email, active, created_at," +
             " updated_at) values ('" +
             accountData.key + "', '" +
             accountData.subscription_id + "', '" +
@@ -25,7 +21,7 @@ module.exports = {
             "true, now(), now())")
         .then(result => {
             logger.log({requestId, level: 'info', message: `account.create - inserted row into key.account    key: ${accountData.key} `})
-            return
+            return null
         })
         .catch(error => {
             logger.log({requestId, level: 'error', message: `account.create - error inserting into key.account    key: ${accountData.key}    error: ${error}`})
@@ -33,12 +29,12 @@ module.exports = {
         })
     },
     
-    insertPostgresKeyRequest: (accountData) => {
-        postgresClient.query("insert into key.request (key,total,created_at,updated_at) values ('" +
+    insertPostgresKeyRequest: async (accountData, requestId) => {
+        return postgresClient.query("insert into key.request (key,total,created_at,updated_at) values ('" +
             accountData.key + "', 0, now(), now())")
         .then(result => {
             logger.log({requestId, level: 'info', message: `account.create - inserted row into key.request    key: ${accountData.key} `})
-            return
+            return null
         })
         .catch(error => {
             logger.log({requestId, level: 'error', message: `account.create - error inserting into key.request    key: ${accountData.key}    error: ${error}`})
@@ -46,8 +42,8 @@ module.exports = {
         })
     },
     
-    insertPostgresKeyLimit: (accountData) => {
-        postgresClient.query("insert into key.limit (key,limit_,created_at,updated_at, ratelimit_max, " +
+    insertPostgresKeyLimit: async (accountData, requestId) => {
+        return postgresClient.query("insert into key.limit (key,limit_,created_at,updated_at, ratelimit_max, " +
             "ratelimit_duration) values ('" +
             accountData.key + "', " +
             accountData.limit + ", now(), now()," +
@@ -55,7 +51,7 @@ module.exports = {
             (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ")")
         .then(result => {
             logger.log({requestId, level: 'info', message: `account.create - inserted row into key.limit    key: ${accountData.key} `})
-            return
+            return null
         })
         .catch(error => {
             logger.log({requestId, level: 'error', message: `account.create - error inserting into key.limit    key: ${accountData.key}    error: ${error}`})
@@ -63,15 +59,15 @@ module.exports = {
         }) 
     },
     
-    insertPostgresKeyAuthorization: (accountData) => {
-        postgresClient.query("insert into key.authorization (key,authorized,created_at,updated_at, ratelimit_max, " +
+    insertPostgresKeyAuthorization: async (accountData, requestId) => {
+        return postgresClient.query("insert into key.authorization (key,authorized,created_at,updated_at, ratelimit_max, " +
             "ratelimit_duration, message) values ('" +
             accountData.key + "', true,  now(), now()," +
             (accountData.ratelimit_max? accountData.ratelimit_max : null) + ", " +
             (accountData.ratelimit_duration? accountData.ratelimit_duration : null) + ", '" + "Account creation" + "')")
         .then(result => {
             logger.log({requestId, level: 'info', message: `account.create - inserted row into key.authorization    key: ${accountData.key} `})
-            return
+            return null
         })
         .catch(error => {
             logger.log({requestId, level: 'error', message: `account.create - error inserting into key.authorization    key: ${accountData.key}    error: ${error}`})
@@ -80,7 +76,7 @@ module.exports = {
     
     },
     
-    insertRedisAuthorization: (accountData) => {
+    insertRedisAuthorization: async (accountData, requestId) => {
         const akey = "authorized:" + accountData.key
         const redis_row = {}
         redis_row.authorized = true
@@ -99,7 +95,7 @@ module.exports = {
         return redisClientSendCommand('SET', args)
         .then(() => {
             logger.log({requestId, level: 'info', message: `account.create - set authorization in redis    key: ${akey}`})
-            return
+            return null
         })
         .catch((error) => {
             logger.log({requestId, level: 'error', message: `account.create - error attempting to set authorization in redis    key: ${akey}    error: ${error}`})
@@ -108,7 +104,7 @@ module.exports = {
     },
     
     
-    sendAccountCreationTextAndEmail: (accountData) => {
+    sendAccountCreationTextAndEmail: async (accountData, requestId) => {
         AWS.config.region = process.env.IP2GEO_AWS_REGION
         const params = {
             Message: JSON.stringify(accountData),
@@ -116,16 +112,15 @@ module.exports = {
         }
         const snsPublishPromise = new AWS.SNS().publish(params).promise()
     
-        snsPublishPromise
+        return snsPublishPromise
         .then( (data) => {
             logger.log({requestId, level: 'info', message: `SNS message ${params.Message} sent to the topic ${params.TopicArn} with MessageID ${data.MessageId}`})
-            return
+            return null
         })
         .catch((error) => {
-            logger.log({requestId, level: 'error', message: `account.sendAccountCreationTextAndEmail - failed to send sns    accountData: ${accountData}    error: ${error}`})
-            return // throw this error on the floor - its annoying but not life threatening
-        })
-    
+            logger.log({requestId, level: 'error', message: `account.sendAccountCreationTextAndEmail - failed to send sns    accountData: ${JSON.stringify(accountData)}    error: ${error}`})
+            return null // throw this error on the floor - its annoying but not life threatening
+        })  
     }
 }
 

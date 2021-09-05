@@ -20,15 +20,15 @@ const _ = {
     unset: require('lodash.unset')
   }
 
-exports.accountEvent = (event) => {
+
+exports.subscriptionEvent = function(event) {
     if (!event) throw new Error( errors.INSUFFICIENT_ARGS_EVENT)
     if (_.isEmpty(event)) throw new Error( errors.INVALID_ARGS_EVENT)
-
-    if (!event.subscription_id) throw new Error( errors.INSUFFICIENT_ARGS_SUBSCRIPTION_ID)
-    if (!event.stripeEmail) throw new Error( errors.INSUFFICIENT_ARGS_STRIPE_EMAIL)
-    if (!event.planID) throw new Error( errors.INSUFFICIENT_ARGS_PLAN_ID)
-    if (!event.plan_name) throw new Error( errors.INSUFFICIENT_ARGS_PLAN_NAME)
+    if (!event.body) throw new Error( errors.INSUFFICIENT_ARGS_EVENT_BODY)
+   
+    const params = new URLSearchParams(event.body)
+    if (!params.get("plan_name")) throw new Error( errors.INSUFFICIENT_ARGS_PLAN_NAME)
+    if (!params.get("stripeToken")) throw new Error( errors.INSUFFICIENT_ARGS_STRIPE_TOKEN)
+    if (!params.get("stripeEmail")) throw new Error( errors.INSUFFICIENT_ARGS_STRIPE_EMAIL)
 }
-
-
 

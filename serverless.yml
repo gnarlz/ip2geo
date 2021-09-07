@@ -145,12 +145,4 @@ functions:
               method: post
               cors: true
 
-  account-display:
-        handler: account/account.display
-        memorySize: 256
-        events:
-          - http:
-              path: account/display
-              method: get
-              cors: true
-        environment:
+  

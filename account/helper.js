@@ -92,6 +92,7 @@ module.exports = {
 
         const args = [akey, JSON.stringify(redis_row)]
         const redisClientSendCommand = util.promisify(redisClient.send_command).bind(redisClient)
+        console.dir(redisClientSendCommand)
         return redisClientSendCommand('SET', args)
         .then(() => {
             logger.log({requestId, level: 'info', message: `account.create - set authorization in redis    key: ${akey}`})

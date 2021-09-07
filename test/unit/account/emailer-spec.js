@@ -28,7 +28,6 @@ const unit = (fns) => {
   })
  }
 
-
 const validAccountData = {
     action: "account.create",
     ts: "2021-09-04 09:20:06.777000",
@@ -50,7 +49,6 @@ _.unset(validAccountDataNoRateLimit, 'ratelimit_max')
 _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
 
 describe('emailer test',() => {
-
     it('should return a string when getHtmlContent() is successful', () => {
         const emailerProxy = unit({
             promise: async () => {return { Body: "HTML CONTENT"}}

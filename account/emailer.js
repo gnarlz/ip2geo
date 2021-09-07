@@ -5,7 +5,6 @@ const postmark = require("postmark")
 const winston = require('winston')
 const logger = winston.createLogger({transports: [new winston.transports.Console()]})
 
-
 const sendNewSubscriberEmail = async (accountData, requestId) => {
     logger.log({requestId, level: 'info', message: `account.sendNewSubscriberEmail - accountData: ${JSON.stringify(accountData)}`})
 
@@ -42,7 +41,6 @@ const getHtmlContent = async (accountData, requestId) => {
         logger.log({requestId, level: 'error',  message: `account.getHtmlContent - error: ${error}`})
         throw error
     })
-
 }
 
 const getTextContent = async (accountData, requestId) =>{
@@ -64,7 +62,6 @@ const getTextContent = async (accountData, requestId) =>{
         logger.log({requestId, level: 'error',  message: `account.getTextContent - error: ${error}`})
         throw error
     })
-
 }
 
 const sendEmail = async (accountData, htmlContent, textContent, requestId) => {

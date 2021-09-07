@@ -11,11 +11,27 @@ const unit = (fns) => {
     return proxyquire('../../../account/helper', {
         '../redis/redis-client': {
             send_command: fns.send_command || (it => it)
-          },
-          '../postgres/postgres-client': {
+        },
+        '../postgres/postgres-client': {
             query: fns.query || (it => it)
-          }
-        
+        },
+        'util':  {
+            promisify (opts) {
+                return  {
+                    bind:  () => {
+                      return fns.bind || (it => it)
+                   } 
+                 } 
+            }        
+        },
+        'aws-sdk': {
+            SNS: class {
+               constructor() {}
+               publish (data) {
+                   return {promise: fns.promise || (it => it)}
+                 }  
+           }
+        }       
   })
 }
 
@@ -40,251 +56,91 @@ const validAccountData = {
     _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
 
 describe('account helper test',() => {
-
-    it('should throw when error is thrown by query() in insertPostgresKeyAccount()', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyAccount query error')}
-        })
-
+    it('should return null when query() is successful in insertPostgresKeyAccount()', () => {
+        const helperProxy = unit({ query: async (data) => {return null} })
         return helperProxy.insertPostgresKeyAccount(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyAccount query error')
-        })
+        .then( (response) => {expect(response).to.be.null} )
+    })
+    it('should throw when error is thrown by query() in insertPostgresKeyAccount()', () => {
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyAccount query error')} })
+        return helperProxy.insertPostgresKeyAccount(validAccountData, 'requestId-12345')
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.contain('insertPostgresKeyAccount query error')} )
+    })
+
+    it('should return null when query() is successful in insertPostgresKeyRequest()', () => {
+        const helperProxy = unit({ query: async (data) => {return null} })
+        return helperProxy.insertPostgresKeyRequest(validAccountData, 'requestId-12345')
+        .then( (response) => {expect(response).to.be.null} )
     })
     it('should throw when error is thrown by query() in insertPostgresKeyRequest()', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyRequest query error')}
-        })
-
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyRequest query error')} })
         return helperProxy.insertPostgresKeyRequest(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyRequest query error')
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.contain('insertPostgresKeyRequest query error')} )
+    })
+
+    it('should return null when query() is successful in insertPostgresKeyLimit()', () => {
+        const helperProxy = unit({ query: async (data) => {return null} })
+        return helperProxy.insertPostgresKeyLimit(validAccountData, 'requestId-12345')
+        .then( (response) => {expect(response).to.be.null} )
     })
     it('should throw when error is thrown by query() in insertPostgresKeyLimit() (rateLimit)', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyLimit query error')}
-        })
-
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyLimit query error')} })
         return helperProxy.insertPostgresKeyLimit(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyLimit query error')
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.contain('insertPostgresKeyLimit query error')} )
     })
     it('should throw when error is thrown by query() in insertPostgresKeyLimit() (no rateLimit)', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyLimit query error')}
-        })
-
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyLimit query error')} })
         return helperProxy.insertPostgresKeyLimit(validAccountDataNoRateLimit, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyLimit query error')
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.contain('insertPostgresKeyLimit query error')} )
+    })
+
+    it('should return null when query() is successful in insertPostgresKeyAuthorization()', () => {
+        const helperProxy = unit({ query: async (data) => {return null} })
+        return helperProxy.insertPostgresKeyAuthorization(validAccountData, 'requestId-12345')
+        .then( (response) => {expect(response).to.be.null} )
     })
     it('should throw when error is thrown by query() in insertPostgresKeyAuthorization() (rateLimit)', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyAuthorization query error')}
-        })
-
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyAuthorization query error')} })
         return helperProxy.insertPostgresKeyAuthorization(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyAuthorization query error')
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.be.contain('insertPostgresKeyAuthorization query error')} )
     })
     it('should throw when error is thrown by query() in insertPostgresKeyAuthorization() (no rateLimit)', () => {
-        const helperProxy = unit({
-            query: async (data) => {throw new Error('insertPostgresKeyAuthorization query error')}
-        })
-
+        const helperProxy = unit({ query: async (data) => {throw new Error('insertPostgresKeyAuthorization query error')} })
         return helperProxy.insertPostgresKeyAuthorization(validAccountDataNoRateLimit, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('insertPostgresKeyAuthorization query error')
-        })
-    })
-
-    it('should return null when query() is successful in insertPostgresKeyAccount()', () => {
-        const helperProxy = unit({
-            query: async (data) => {return null}
-        })
-
-        return helperProxy.insertPostgresKeyAccount(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-            })
-        
-    })
-    it('should return null when query() is successful in insertPostgresKeyRequest()', () => {
-        const helperProxy = unit({
-            query: async (data) => {return null}
-        })
-
-        return helperProxy.insertPostgresKeyRequest(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
-    })
-    it('should return null when query() is successful in insertPostgresKeyLimit()', () => {
-        const helperProxy = unit({
-            query: async (data) => {return null}
-        })
-
-        return helperProxy.insertPostgresKeyLimit(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
-    })
-    it('should return null when query() is successful in insertPostgresKeyAuthorization()', () => {
-        const helperProxy = unit({
-            query: async (data) => {return null}
-        })
-
-        return helperProxy.insertPostgresKeyAuthorization(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')} )
+        .catch( (error) => {expect(error.message).to.be.contain('insertPostgresKeyAuthorization query error')} )
     })
 
     it('should return null when insert is successful in redis (ratelimit)', () => {
-        const util = {
-             promisify (opts) {
-                const foo = {
-                    bind:  () => {
-                      return async function (){return null}
-                   } 
-               }
-               return foo
-            }        
-       }
-
-       const unit = (fns) => {
-           return proxyquire('../../../account/helper', {
-            'util':  util 
-         })
-       }
-
-        const helperProxy = unit()
-
+        const helperProxy = unit({bind: async () => {return null}})
         return helperProxy.insertRedisAuthorization(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
+        .then( (response) => {expect(response).to.be.null} )
     })
     it('should return null when insert is successful in redis (no ratelimit)', () => {
-        const util = {
-             promisify (opts) {
-                const foo = {
-                    bind:  () => {
-                      return async function (){return null}
-                   } 
-               }
-               return foo
-            }        
-       }
-
-       const unit = (fns) => {
-           return proxyquire('../../../account/helper', {
-            'util':  util 
-         })
-       }
-        const helperProxy = unit()
-
+        const helperProxy = unit({bind: async () => {return null}})        
         return helperProxy.insertRedisAuthorization(validAccountDataNoRateLimit, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
+        .then( (response) => {expect(response).to.be.null} )
     })
     it('should throw when insert is not successful in redis', () => {
-        const util = {
-             promisify (opts) {
-                const foo = {
-                    bind:  () => {
-                      return async function (){throw new Error('redisClientSendCommand error')}
-                   } 
-               }
-               return foo
-            }        
-       }
-
-       const unit = (fns) => {
-           return proxyquire('../../../account/helper', {
-            'util':  util 
-         })
-       }
-
-        const helperProxy = unit()
-
+        const helperProxy = unit({bind: async () => { throw new Error('redisClientSendCommand error') }} )   
         return helperProxy.insertRedisAuthorization(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            throw new Error('should have thrown error, test failed')})
-        .catch( (error) => {
-            expect(error.message).to.be.contain('redisClientSendCommand error')
-        })
+        .then( (response) => {throw new Error('should have thrown error, test failed')})
+        .catch( (error) => {expect(error.message).to.be.contain('redisClientSendCommand error')} )
     })
 
     it('should return null when SNS is not successfully sent', () => {
-        const AWS = {
-             SNS: class {
-                constructor() {}
-
-                publish (opts) {
-                    const foo = {
-                         promise: async () => {
-                            throw new Error('AWS.SNS().publish(params).promise() error')
-                        } 
-                    }
-                    return foo
-                  }  
-            }
-        }
-        const unit = (fns) => {
-            return proxyquire('../../../account/helper', {
-                  'aws-sdk':  AWS
-          })
-        }
-        const helperProxy = unit({})
+        const helperProxy = unit({promise: async () => { throw new Error('AWS.SNS().publish(params).promise() error') }})
         return helperProxy.sendAccountCreationTextAndEmail(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
+        .then ( (response) => {expect(response).to.be.null} ) 
     })
     it('should return null when SNS is successfully sent', () => {
-        const AWS = {
-             SNS: class {
-                constructor() {}
-
-                publish (opts) {
-                    const foo = {
-                         promise: async () => {
-                            return {foo: "bar"}
-                        } 
-                    }
-                    return foo
-                  }  
-            }
-        }
-        const unit = (fns) => {
-            return proxyquire('../../../account/helper', {
-                  'aws-sdk':  AWS
-          })
-        }
-        const helperProxy = unit({})
+        const helperProxy = unit({promise: async () => { return null }})
         return helperProxy.sendAccountCreationTextAndEmail(validAccountData, 'requestId-12345')
-        .then ( (response) => {
-            expect(response).to.be.null
-        })
+        .then ( (response) => {expect(response).to.be.null} )
     })
-
-  
 })

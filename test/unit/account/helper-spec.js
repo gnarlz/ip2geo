@@ -1,9 +1,11 @@
 'use strict'
 
 const expect  = require("chai").expect
-const account = require('../../../account/helper')
-const uuidv4 = require('uuid/v4')
 const proxyquire = require('proxyquire')
+const _ = {
+    cloneDeep: require('lodash.clonedeep'),
+    unset: require('lodash.unset')
+  }
 
 const unit = (fns) => {
     return proxyquire('../../../account/helper', {
@@ -17,7 +19,6 @@ const unit = (fns) => {
   })
 }
 
-//  new AWS.SNS().publish(params).promise()
 const validAccountData = {
     action: "account.create",
     ts: "2021-09-04 09:20:06.777000",
@@ -33,19 +34,11 @@ const validAccountData = {
     ratelimit_duration: 60000,
     price: 19
   }
-  const validAccountDataNoRateLimit = {
-    action: "account.create",
-    ts: "2021-09-04 09:20:06.777000",
-    key: "934c6e53-f326-4d21-a263-9b877f8a70fe",
-    subscription_id: "7579f1a3-c9d9-44c4-8d33-06c8b016acc4",
-    email: "test@ip2geo.co",
-    plan_id: "plan_GVK3dbrCJxAEqa",
-    plan_name: "mvp_001",
-    plan_created_at: "2019-11-03 13:30:11.606000",
-    display_name: "MVP",
-    limit: 300000,
-    price: 19
-  }
+
+  const validAccountDataNoRateLimit = _.cloneDeep(validAccountData)
+    _.unset(validAccountDataNoRateLimit, 'ratelimit_max')
+    _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
+
 describe('account helper test',() => {
 
     it('should throw when error is thrown by query() in insertPostgresKeyAccount()', () => {
@@ -205,7 +198,6 @@ describe('account helper test',() => {
             'util':  util 
          })
        }
-
         const helperProxy = unit()
 
         return helperProxy.insertRedisAuthorization(validAccountDataNoRateLimit, 'requestId-12345')

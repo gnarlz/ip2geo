@@ -10,7 +10,7 @@ const logger = winston.createLogger({transports: [new winston.transports.Console
 const plans = require('./plans')
 const errors = require('../lib/errors')
 const utilities  = require('../utility/utilities')
-const emailer = require('../email/emailer')
+const emailer = require('./emailer')
 const validate = require('./validate')
 const {
     insertPostgresKeyAccount,insertPostgresKeyRequest, insertPostgresKeyLimit,
@@ -83,7 +83,7 @@ module.exports.create = async (event, context) => {
     .catch((error) => {
         accountData.status = 'FAILURE'
         accountData.message = `account not created - error: ${error}`
-        logger.log({requestId, level: 'error',  message: `account.create - error creating account: ${JSON.stringify(accountData)}`})
+        logger.log({requestId, level: 'error',  message: `account.create - error creating account: ${JSON.stringify(accountData)}   error: ${error}`})
         return error
     })
     .then((error) => {

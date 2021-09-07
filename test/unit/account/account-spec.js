@@ -16,7 +16,7 @@ const unit = (fns) => {
             insertRedisAuthorization: fns.insertRedisAuthorization || (it => it),
             sendAccountCreationTextAndEmail: fns.sendAccountCreationTextAndEmail || (it => it)
           },
-          '../email/emailer': {
+          './emailer': {
             sendNewSubscriberEmail: fns.sendNewSubscriberEmail || (it => it)
           }
   })

@@ -4,6 +4,7 @@
 const expect  = require("chai").expect
 const account = require('../../../account/account')
 const uuidv4 = require('uuid/v4')
+//const { v4: uuidv4 } = require('uuid')
 const proxyquire = require('proxyquire')
 
 const unit = (fns) => {
@@ -22,9 +23,9 @@ const unit = (fns) => {
   })
 }
 
-const validContext = {"awsRequestId": uuidv4()}
+const validContext = {"awsRequestId":uuidv4()}
 const validEvent = {
-    subscription_id: uuidv4(),
+    subscription_id:uuidv4(),
     stripeEmail: 'test@ip2geo.co',
     planID: 'plan_GVK3dbrCJxAEqa',
     plan_name: 'mvp_001',
@@ -38,7 +39,6 @@ const validEvent = {
 }
 
 const validateErrorResponse = (response) => {
-    // console.log(`$$$$$$$ response: ${JSON.stringify(response,null,2)}`)
     expect(response).to.be.ok
     expect(response.body).to.be.ok
     expect(response.body.status).to.equal('error')
@@ -48,7 +48,6 @@ const validateErrorResponse = (response) => {
     expect(response.body.error.code).to.equal(500)
 }
 const validateSuccessResponse = (response) => {
-    // console.log(`$$$$$$$ response: ${JSON.stringify(response,null,2)}`)
     expect(response).to.be.ok
     expect(response.body).to.be.ok
     expect(response.body.status).to.equal('success')
@@ -58,20 +57,20 @@ const validateSuccessResponse = (response) => {
 describe('account.create test',() => {
 
     it('should return well formed error response when error is thrown by validation (null event)', () => {
-        const context = { "awsRequestId": uuidv4()}  
+        const context = { "awsRequestId":uuidv4()}  
         return account.create(null,context)
         .then (response => validateErrorResponse(response))
            
     })
     it('should return well formed error response when error is thrown by validation (empty event)', () => {
-        const context = { "awsRequestId": uuidv4()}  
+        const context = { "awsRequestId":uuidv4()}  
         const event = {}
         return account.create(event,context)
         .then (response => validateErrorResponse(response))
     })
 
     it('should return well formed error response when error is thrown by validation (null subscription_id)', () => {
-        const context = { "awsRequestId": uuidv4()}
+        const context = { "awsRequestId":uuidv4()}
         const event = {
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
@@ -88,7 +87,7 @@ describe('account.create test',() => {
         .then (response => validateErrorResponse(response))
     })
     it('should return well formed error response when error is thrown by validation (empty subscription_id)', () => {
-        const context = { "awsRequestId": uuidv4()}
+        const context = { "awsRequestId":uuidv4()}
         const event = {
             subscription_id: '',
             stripeEmail: 'test@ip2geo.co',
@@ -107,9 +106,9 @@ describe('account.create test',() => {
     })
   
     it('should return well formed error response when error is thrown by validation (null stripeEail)', () => {
-        const context = {"awsRequestId": uuidv4()}
+        const context = {"awsRequestId":uuidv4()}
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
             queryStringParameters:{},
@@ -124,9 +123,9 @@ describe('account.create test',() => {
         .then (response => validateErrorResponse(response))
     })
     it('should return well formed error response when error is thrown by validation (empty stripeEail)', () => {
-        const context = {"awsRequestId": uuidv4()}
+        const context = {"awsRequestId":uuidv4()}
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             stripeEmail: '',
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: 'mvp_001',
@@ -143,9 +142,9 @@ describe('account.create test',() => {
     })
 
     it('should return well formed error response when error is thrown by validation (null planID)', () => {
-        const context = { "awsRequestId": uuidv4()}
+        const context = { "awsRequestId":uuidv4()}
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             plan_name: 'mvp_001',
             queryStringParameters:{},
@@ -161,10 +160,10 @@ describe('account.create test',() => {
     })
     it('should return well formed error response when error is thrown by validation (empty planID)', () => {
         const context = {
-            "awsRequestId": uuidv4()
+            "awsRequestId":uuidv4()
         }
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: '',
             plan_name: 'mvp_001',
@@ -181,9 +180,9 @@ describe('account.create test',() => {
     })
 
     it('should return well formed error response when error is thrown by validation (null plan_name)', () => {
-        const context = {"awsRequestId": uuidv4()}
+        const context = {"awsRequestId":uuidv4()}
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
             queryStringParameters:{},
@@ -198,9 +197,9 @@ describe('account.create test',() => {
         .then (response => validateErrorResponse(response))
     })
     it('should return well formed error response when error is thrown by validation (empty plan_name)', () => {
-        const context = {"awsRequestId": uuidv4()}
+        const context = {"awsRequestId":uuidv4()}
         const event = {
-            subscription_id: uuidv4(),
+            subscription_id:uuidv4(),
             stripeEmail: 'test@ip2geo.co',
             planID: 'plan_GVK3dbrCJxAEqa',
             plan_name: '',

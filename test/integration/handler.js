@@ -7,6 +7,7 @@ chai.use(require('dirty-chai'))
 const expect = chai.expect
 const handler = require('../../handler');
 const uuidv4 = require('uuid/v4');
+//const { v4: uuidv4 } = require('uuid')
 
 describe('handler.lookup test',() => {
 

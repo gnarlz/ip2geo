@@ -4,6 +4,7 @@ const config = require('../config');
 const expect  = require("chai").expect;
 const subscribe = require('../../subscribe/subscribe');
 const uuidv4 = require('uuid/v4');
+//const { v4: uuidv4 } = require('uuid')
 
 
 describe('subscribe.subscribe test',() => {

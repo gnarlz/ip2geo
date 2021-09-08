@@ -94,7 +94,6 @@ module.exports.create = async (event, context) => {
     })
 }
 
-
 const populateAccountData = (event) => {
     const accountData = {}
     accountData.action = "account.create"
@@ -112,7 +111,6 @@ const populateAccountData = (event) => {
     accountData.price = plans[event.plan_name].price
     return accountData
 }
-
 
 const createErrorResponse = (request, start) => {
     const response = {}
@@ -132,7 +130,6 @@ const createErrorResponse = (request, start) => {
     response.body = payload
     return response
 }
-
 
 const createSuccessResponse = (request, start) =>{
     const response = {}

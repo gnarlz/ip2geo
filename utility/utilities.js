@@ -5,11 +5,11 @@ const _ = {
     isEmpty: require('lodash.isempty')
   }
 
-exports.isnumeric = function(n) {
+const isnumeric = (n) => {
     return !isNaN(parseFloat(n)) && isFinite(n)
 }
 
-exports.setResponseHeadersCORS = function(response) {
+const setResponseHeadersCORS = (response) => {
     response.headers = {
         "X-Requested-With": "*",
         "Access-Control-Allow-Headers": "*",
@@ -18,7 +18,8 @@ exports.setResponseHeadersCORS = function(response) {
     }
 }
 
-exports.enrichRequest = function(request, event, context) {
+const enrichRequest = (event, context) => {
+    const request = {}
     request.request_id = context.awsRequestId
     request.request_ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS')
     request.source_ip = (!_.isEmpty(event))? event['requestContext']['identity']['sourceIp'] : null
@@ -31,4 +32,7 @@ exports.enrichRequest = function(request, event, context) {
     request.origin = (!_.isEmpty(event))? event['headers']['origin']: null
     request.referer = (!_.isEmpty(event))? event['headers']['Referer']: null
     request.user_agent = (!_.isEmpty(event))? event['headers']['User-Agent']: null
+    return request
 }
+
+module.exports = {isnumeric,setResponseHeadersCORS, enrichRequest}

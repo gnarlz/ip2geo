@@ -9,15 +9,16 @@ const redisOpts = {
     password  : process.env.REDIS_PASS
 }
 
-console.log(`redisOpts: ${JSON.stringify(redisOpts,null,2)}`)
-client = redis.createClient(redisOpts)  
+if (!(process.env.NODE_ENV && process.env.NODE_ENV === 'unit')){
+    console.log(`redisOpts: ${JSON.stringify(redisOpts,null,2)}`)
+    client = redis.createClient(redisOpts)  
 
-client.on('connect', function() {
-    console.log("redis client - connected")
-})
-client.on('error', function (err) {
-    console.error("redis client - error:" + err)
-})
-
+    client.on('connect', function() {
+        console.log("redis client - connected")
+    })
+    client.on('error', function (err) {
+        console.error("redis client - error:" + err)
+    })
+}
 
 module.exports = client

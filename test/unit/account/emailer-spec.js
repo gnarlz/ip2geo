@@ -7,8 +7,6 @@ const _ = {
     unset: require('lodash.unset')
   }
 
-// new AWS.S3().getObject(html_params).promise()
-// new postmark.ServerClient(process.env.POSTMARK_API_KEY).sendEmail(message)
 const unit = (fns) => {
     return proxyquire('../../../account/emailer', {
         'aws-sdk': {

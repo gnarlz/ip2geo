@@ -65,9 +65,9 @@ const getTextContent = async (accountData, requestId) =>{
 }
 
 const sendEmail = async (accountData, htmlContent, textContent, requestId) => {
-
-
     const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY)
+    // TODO: sign up for new postmark account and integrate back into the stack
+    
     const message = {
         From: "support@ip2geo.co",
         To: accountData.email,

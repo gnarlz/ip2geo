@@ -7,7 +7,7 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
-  stage: v1
+  stage: dev
   region: us-east-1
   logs:   # enables api gateway to write logs to cloudwatch
     restApi: true
@@ -17,15 +17,7 @@ provider:
     - Effect: "Allow"
       Action:
         - "sns:*"
-      Resource: "*"
-
-    - Effect: 'Allow'
-      Action:
         - 'lambda:InvokeFunction'
-      Resource: "*"
-
-    - Effect: "Allow"
-      Action:
         - "s3:*"
       Resource: "*"
 

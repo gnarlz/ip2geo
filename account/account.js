@@ -49,15 +49,13 @@ const {
  */
 module.exports.create = async (event, context) => {
     const start = new Date()
-    const request = {}
     const requestId = context.awsRequestId
-   
-    utilities.enrichRequest(request, event, context)
+    const request = utilities.enrichRequest(event, context)
 
     try {
         validate.accountEvent(event)
     } catch (error) {
-        logger.log({requestId, level: 'error',message: `account.create - validation error: ${error}`})
+        logger.log({requestId, level: 'error',message: `account.create - validation error: ${error}  event: ${JSON.stringify(event)} `})
         return createErrorResponse(request, start)
     }
     
@@ -87,7 +85,7 @@ module.exports.create = async (event, context) => {
         return error
     })
     .then((error) => {
-        sendAccountCreationTextAndEmail(accountData, requestId) 
+        sendAccountCreationTextAndEmail(accountData, requestId)  // this will be called for both success and failure
 
         if (error) return createErrorResponse(request, start)
         return createSuccessResponse(request, start)

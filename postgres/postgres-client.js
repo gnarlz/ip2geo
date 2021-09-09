@@ -11,19 +11,19 @@ const postgresOpts = {
     database: process.env.POSTGRES_DB? process.env.POSTGRES_DB : "ip2geo"
 }
 
-console.log(`postgresOpts: ${JSON.stringify(postgresOpts,null,2)}`) // connects to local postgres if opts empty
-client = new Client(postgresOpts)
+if (!(process.env.NODE_ENV && process.env.NODE_ENV === 'unit')){
+    console.log(`postgresOpts: ${JSON.stringify(postgresOpts,null,2)}`) // connects to local postgres if opts empty
+    client = new Client(postgresOpts)
 
-client.connect(err => {
-    if (err) {
-        console.error(err)
-        console.error('postgres connection error', err.stack)
-    } else {
-        console.log('postgres client - connected')
-    }
-})
-
-
+    client.connect(err => {
+        if (err) {
+            console.error(err)
+            console.error('postgres connection error', err.stack)
+        } else {
+            console.log('postgres client - connected')
+        }
+    })
+}
 
 module.exports = client
 

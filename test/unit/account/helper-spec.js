@@ -51,9 +51,9 @@ const validAccountData = {
     price: 19
   }
 
-  const validAccountDataNoRateLimit = _.cloneDeep(validAccountData)
-    _.unset(validAccountDataNoRateLimit, 'ratelimit_max')
-    _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
+const validAccountDataNoRateLimit = _.cloneDeep(validAccountData)
+_.unset(validAccountDataNoRateLimit, 'ratelimit_max')
+_.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
 
 describe('account helper test',() => {
     it('should return null when query() is successful in insertPostgresKeyAccount()', () => {
@@ -139,7 +139,7 @@ describe('account helper test',() => {
         .then ( (response) => {expect(response).to.be.null} ) 
     })
     it('should return null when SNS is successfully sent', () => {
-        const helperProxy = unit({promise: async () => { return null }})
+        const helperProxy = unit({promise: async () => { return {foo: 'bar'} }})
         return helperProxy.sendAccountCreationTextAndEmail(validAccountData, 'requestId-12345')
         .then ( (response) => {expect(response).to.be.null} )
     })

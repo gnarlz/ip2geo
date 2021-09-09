@@ -1,6 +1,8 @@
 'use strict'
 
 const redis = require('redis')
+const winston = require('winston')
+const logger = winston.createLogger({transports: [new winston.transports.Console()]})
 
 let client
 const redisOpts = {
@@ -9,16 +11,15 @@ const redisOpts = {
     password  : process.env.REDIS_PASS
 }
 
-if (!(process.env.NODE_ENV && process.env.NODE_ENV === 'unit')){
-    console.log(`redisOpts: ${JSON.stringify(redisOpts,null,2)}`)
-    client = redis.createClient(redisOpts)  
-
-    client.on('connect', function() {
-        console.log("redis client - connected")
-    })
-    client.on('error', function (err) {
-        console.error("redis client - error:" + err)
-    })
-}
+// connects to local redis if opts empty
+logger.log({level: 'info', message: `redis-client - opts: ${JSON.stringify(redisOpts,null,2)}`})
+client = redis.createClient(redisOpts)  
+client.on('connect', function() {
+    logger.log({level: 'info', message: `redis-client - connected`})
+})
+    /* istanbul ignore next */
+client.on('error', function (err) {
+    logger.log({level: 'error', message: `redis-client - error: ${err}`})
+})
 
 module.exports = client

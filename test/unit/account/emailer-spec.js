@@ -46,7 +46,7 @@ const validAccountDataNoRateLimit = _.cloneDeep(validAccountData)
 _.unset(validAccountDataNoRateLimit, 'ratelimit_max')
 _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
 
-describe('emailer test',() => {
+describe('account/emailer test',() => {
     it('should return a string when getHtmlContent() is successful', () => {
         const emailerProxy = unit({
             promise: async () => {return { Body: "HTML CONTENT"}}

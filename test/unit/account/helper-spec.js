@@ -55,7 +55,7 @@ const validAccountDataNoRateLimit = _.cloneDeep(validAccountData)
 _.unset(validAccountDataNoRateLimit, 'ratelimit_max')
 _.unset(validAccountDataNoRateLimit, 'ratelimit_duration')
 
-describe('account helper test',() => {
+describe('account/helper test',() => {
     it('should return null when query() is successful in insertPostgresKeyAccount()', () => {
         const helperProxy = unit({ query: async (data) => {return null} })
         return helperProxy.insertPostgresKeyAccount(validAccountData, 'requestId-12345')

@@ -57,7 +57,7 @@ const unit = (fns) => {
     expect(response.headers["Location"]).to.equal('https://www.ip2geo.co/subscribed.html')
  }
 
-describe('subscribe test',() => {
+describe('subscribe/subscribe test',() => {
     it('subscribe() should return well formed error response when error is thrown by validation (null event)', () => {
         const subscribeProxy = unit({})
         return subscribeProxy.subscribe(null, validContext)

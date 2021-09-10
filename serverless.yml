@@ -80,17 +80,11 @@ functions:
             cors: true
       reservedConcurrency: 100
 
-  authorized:
-      handler: scheduled/authorized.run
+  authorization:
+      handler: scheduled/authorization.run
       memorySize: 256
       events:
         - schedule: rate(60 minutes)
-
-  sync:
-        handler: scheduled/sync.run
-        memorySize: 256
-        events:
-          - schedule: rate(60 minutes)
 
   subscribe-mvp:
         handler: subscribe/subscribe.mvp

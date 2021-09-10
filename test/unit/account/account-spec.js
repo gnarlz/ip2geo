@@ -53,7 +53,7 @@ const validateSuccessResponse = (response) => {
     expect(response.body.status_code).to.equal(200)
 }
 
-describe('account.create test',() => {
+describe('account/account.create test',() => {
     it('should return well formed error response when error is thrown by validation (null event)', () => {
         const accountProxy = unit({})
         return accountProxy.create(null, validContext)

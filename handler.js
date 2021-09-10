@@ -10,6 +10,7 @@ const utilities  = require('./utility/utilities');
 
 module.exports.lookup = (event, context) => {
     return new Promise((resolve, reject) => {
+        const requestId = context.awsRequestId
         const start = new Date();
         const payload = {};
         const request = {};
@@ -29,7 +30,7 @@ module.exports.lookup = (event, context) => {
             .then((authorizeResult) =>{
                 return rateLimiter.limit(key, authorizeResult, response);})
             .then(() => {
-                return Promise.all([requestCounter.increment(key), ip2geo.lookup(ip), ip2asn.lookup(ip)]);})
+                return Promise.all([requestCounter.increment(key, requestId), ip2geo.lookup(ip, requestId), ip2asn.lookup(ip, requestId)]);})
             .then(([requestCounterResult, ip2geoResult, ip2asnResult]) => {
                 createSuccessResponse(request, response, payload, ip2geoResult, ip2asnResult, start);
             })

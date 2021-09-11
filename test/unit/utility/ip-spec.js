@@ -2,10 +2,9 @@
 
 const expect  = require("chai").expect
 const http = require('http-codes')
-const ip = require('../../../lib/ip')
+const ip = require('../../../utility/ip')
 
-
-describe('lib/ip test',() => {
+describe('utility/ip test',() => {
     it('ip.numeric() should throw for an invalid ipv4 and ipv6 addresses', () => {
         const invalidIPs = ['3456', 'foo', '100.200.300.400', '2001:db8:3333:4444:5555:6666:7777:888x']
         invalidIPs.map( (ipAddress) => {
@@ -24,5 +23,4 @@ describe('lib/ip test',() => {
     it('ip.numeric() should return numeric value for a valid ipv6 address (address needs expansion)', () => {
         expect(ip.numeric('2001:0000:3238:DFE1:63::FEFB')).to.be.an('string')
     })
-   
 })

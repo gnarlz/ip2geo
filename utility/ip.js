@@ -11,7 +11,7 @@ const logger = winston.createLogger({transports: [new winston.transports.Console
 const numeric = (ip, requestId) => {
 
     if(!isIp(ip)){
-        logger.log({requestId, level: 'error', message: `ip.numeric - ip is not valid: ${ip}`})
+        logger.log({requestId, level: 'error', message: `utility/ip.numeric - ip is not valid: ${ip}`})
         const error = new Error()
         error.message = `Invalid IP Address included in the request: ${ip}`
         error.code = http.BAD_REQUEST

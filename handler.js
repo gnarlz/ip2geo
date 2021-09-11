@@ -26,7 +26,7 @@ module.exports.lookup = (event, context) => {
 
         Promise.all([validate.ip(ip), validate.key(key) ])
             .then(([ipResult, keyResult]) =>{
-                return authorize.key(key);})
+                return authorize.key(key, requestId);})
             .then((authorizeResult) =>{
                 return rateLimiter.limit(key, authorizeResult, response);})
             .then(() => {

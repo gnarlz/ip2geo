@@ -28,7 +28,7 @@ module.exports.lookup = (event, context) => {
             .then(([ipResult, keyResult]) =>{
                 return authorize.key(key, requestId);})
             .then((authorizeResult) =>{
-                return rateLimiter.limit(key, authorizeResult, response);})
+                return rateLimiter.limit(key, authorizeResult, response, requestId);})
             .then(() => {
                 return Promise.all([requestCounter.increment(key, requestId), ip2geo.lookup(ip, requestId), ip2asn.lookup(ip, requestId)]);})
             .then(([requestCounterResult, ip2geoResult, ip2asnResult]) => {

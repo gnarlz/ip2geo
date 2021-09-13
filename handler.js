@@ -24,7 +24,7 @@ module.exports.lookup = (event, context) => {
         utilities.enrichRequest(request, event, context);
         utilities.setResponseHeadersCORS(response);   // enable CORS in api gateway when using lambda proxy integration
 
-        Promise.all([validate.ip(ip), validate.key(key) ])
+        Promise.all([validate.ip(ip, requestId), validate.key(key, requestId) ])
             .then(([ipResult, keyResult]) =>{
                 return authorize.key(key, requestId);})
             .then((authorizeResult) =>{

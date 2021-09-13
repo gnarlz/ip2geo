@@ -27,7 +27,6 @@ const unit = (fns) => {
         }    
   })
 }
-const validContext = {"awsRequestId":uuidv4()}
 
 describe('scheduled/authorization test',() => {
     it('should return null when query() is successful in insertPostgresAuthorization() (ratelimit_max and ratelimit_duration)', () => {
@@ -110,7 +109,7 @@ describe('scheduled/authorization test',() => {
                 }     
             }
         })
-        return authorizationProxy.run({}, validContext)
+        return authorizationProxy.run({})
         .then( (response) => {expect(response).to.be.null} )
     })
     it('should return null when run() is successful (no keys to expire)', () => {
@@ -125,7 +124,7 @@ describe('scheduled/authorization test',() => {
                 }     
             }
         })
-        return authorizationProxy.run({}, validContext)
+        return authorizationProxy.run({})
         .then( (response) => {expect(response).to.be.null} )
     })
 
@@ -145,7 +144,7 @@ describe('scheduled/authorization test',() => {
                 }     
             }
         })
-        return authorizationProxy.run({}, validContext)
+        return authorizationProxy.run({})
         .then( (response) => {throw new Error('should have thrown error, test failed')})
         .catch( (error) => {expect(error.message).to.be.contain('select error')} )
     })
@@ -165,7 +164,7 @@ describe('scheduled/authorization test',() => {
                 }     
             }
         })
-        return authorizationProxy.run({}, validContext)
+        return authorizationProxy.run({})
         .then( (response) => {throw new Error('should have thrown error, test failed')})
         .catch( (error) => {expect(error.message).to.be.contain('insert error')} )
     })
@@ -185,7 +184,7 @@ describe('scheduled/authorization test',() => {
                 }     
             }
         })
-        return authorizationProxy.run({}, validContext)
+        return authorizationProxy.run({})
         .then( (response) => {throw new Error('should have thrown error, test failed')})
         .catch( (error) => {expect(error.message).to.be.contain('set error')} )
     })

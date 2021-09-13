@@ -22,7 +22,7 @@ const unit = (fns) => {
   })
 }
 
-const validContext = {"awsRequestId":uuidv4()}
+const validContext = {awsRequestId: uuidv4()}
 const validEvent = {
     subscription_id:uuidv4(),
     stripeEmail: 'test@ip2geo.co',

@@ -35,7 +35,7 @@ const unit = (fns) => {
   })
  }
 
- const validContext = {"awsRequestId":uuidv4()}
+ const validContext = {awsRequestId: uuidv4()}
  const validEvent = {
     body: {
         plan_name: 'plan_GVK3dbrCJxAEqa',

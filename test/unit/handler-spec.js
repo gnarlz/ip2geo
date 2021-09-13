@@ -20,7 +20,7 @@ const unit = (fns) => {
   })
 }
 
-const validContext = {"awsRequestId":uuidv4()}
+const validContext = {awsRequestId: uuidv4()}
 const validEvent = {
     queryStringParameters:{
         key: '3ad9fbb4-7635-43bf-a87b-b3cac1809e58',

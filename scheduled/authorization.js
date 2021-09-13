@@ -4,6 +4,7 @@ const postgresClient = require('../postgres/postgres-client')
 const redisClient = require('../redis/redis-client')
 const util = require('util')
 const moment = require('moment')
+const uuidv4 = require('uuid/v4')
 const winston = require('winston')
 const logger = winston.createLogger({transports: [new winston.transports.Console()]})
 
@@ -19,8 +20,8 @@ const logger = winston.createLogger({transports: [new winston.transports.Console
  * @return null if success, else error
  * @public
  */
-const run = async (event, context) => {
-    const requestId = context.awsRequestId
+const run = async (event) => {
+    const requestId = uuidv4()
     logger.log({requestId, level: 'info', message: `authorization.run - start`})
 
     // find all keys that are over their monthly limit AND whose latest row in key.authorization is TRUE

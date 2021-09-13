@@ -104,7 +104,7 @@ Typical API latencies are ~3ms (however, AWS API Gateway latencies add another ~
 ## Features
  
 ### Rate Limiting
-Rate limiting is implemented using [ratelimiter](https://github.com/tj/node-ratelimiter). 
+Rate limiting is implemented using [rate-limiter-flexible](https://github.com/animir/node-rate-limiter-flexible). 
  
 ### Subscriptions and Recurring Payments
 Subscriptions and recurring payments are implemented using [Stripe](https://github.com/stripe/stripe-node).

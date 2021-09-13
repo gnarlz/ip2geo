@@ -17,7 +17,7 @@ client = redis.createClient(redisOpts)
 client.on('connect', function() {
     logger.log({level: 'info', message: `redis-client - connected`})
 })
-    /* istanbul ignore next */
+ /* istanbul ignore next */
 client.on('error', function (err) {
     logger.log({level: 'error', message: `redis-client - error: ${err}`})
 })

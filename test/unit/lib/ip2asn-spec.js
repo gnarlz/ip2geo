@@ -24,8 +24,7 @@ const unit = (fns) => {
 const validIP = '130.140.150.160'
 
 describe('lib/ip2asn test',() => {
-    it('should throw when zrangebyscore returns data for ip in redis', () => {
-        
+    it('should return successfgul response when zrangebyscore returns data for ip in redis', () => {
         const asnResponse = [ '{"AS_number": "456", "AS_description": "foo"}' ]
         const ip2asnProxy = unit({bind: async () => { return asnResponse }} )   
         return ip2asnProxy.lookup(validIP, 'requestId-12345')

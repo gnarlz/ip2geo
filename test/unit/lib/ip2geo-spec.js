@@ -24,7 +24,7 @@ const unit = (fns) => {
 const validIP = '130.140.150.160'
 
 describe('lib/ip2geo test',() => {
-    it('should throw when zrangebyscore returns data for ip in redis', () => {  
+    it('should return successful response when zrangebyscore returns data for ip in redis', () => {  
         const geoResponse = {
             latitude: "70.123",
             longitude: "120.567",
@@ -37,7 +37,6 @@ describe('lib/ip2geo test',() => {
             continent_name: "North America",
             continent_code: "NA",
             time_zone: "America/Chicago",
-
             time_zone_abbr: "CDT",
             time_zone_offset: -21600,
             time_zone_is_dst: 1,
@@ -68,7 +67,7 @@ describe('lib/ip2geo test',() => {
         })
        
     })
-    it('should throw when zrangebyscore returns data for ip in redis (no lat/lon returned)', () => {  
+    it('should return successful response when zrangebyscore returns data for ip in redis (no lat/lon returned)', () => {  
         const geoResponse = {
             // latitude: "70.123",
             // longitude: "120.567",
@@ -112,7 +111,7 @@ describe('lib/ip2geo test',() => {
         })
        
     })
-    it('should throw when zrangebyscore returns data for ip in redis (no time_zone, time_zone_offset or time_zone_is_dst returned)', () => {  
+    it('should return successful response when zrangebyscore returns data for ip in redis (no time_zone, time_zone_offset or time_zone_is_dst returned)', () => {  
         const geoResponse = {
             latitude: "70.123",
             longitude: "120.567",
@@ -155,7 +154,7 @@ describe('lib/ip2geo test',() => {
         })
        
     })
-    it('should throw when zrangebyscore returns data for ip in redis (no is_anonymous_proxy or is_satellite_provider returned)', () => {  
+    it('should return successful response when zrangebyscore returns data for ip in redis (no is_anonymous_proxy or is_satellite_provider returned)', () => {  
         const geoResponse = {
             // latitude: "70.123",
             // longitude: "120.567",

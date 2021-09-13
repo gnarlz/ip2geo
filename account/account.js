@@ -5,8 +5,6 @@ const uuidv4 = require('uuid/v4')
 const http = require('http-codes')
 const winston = require('winston')
 const logger = winston.createLogger({transports: [new winston.transports.Console()]})
-
-
 const plans = require('./plans')
 const errors = require('../lib/errors')
 const utilities  = require('../utility/utilities')

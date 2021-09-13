@@ -34,7 +34,7 @@ const validEvent = {
             sourceIp: process.env.SOURCE_IP
         }
     },
-    headers: []
+    headers: {}
 }
 
 const validateErrorResponse = (response) => {
@@ -77,7 +77,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -95,7 +95,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -131,7 +131,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -149,7 +149,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -167,7 +167,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -185,7 +185,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)
@@ -203,7 +203,7 @@ describe('account/account.create test',() => {
                     sourceIp: process.env.SOURCE_IP
                 }
             },
-            headers: []
+            headers: {}
         }
         const accountProxy = unit({})
         return accountProxy.create(event, validContext)

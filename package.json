@@ -8,6 +8,7 @@
   },
   "main": "handler.js",
   "scripts": {
+    "lint": "standard --verbose | snazzy",
     "start-redis": "sh test/redis-local.sh",
     "stop-redis": "docker stop ip2geo-redis",
     "clean-redis": "docker stop ip2geo-redis && docker rm ip2geo-redis",

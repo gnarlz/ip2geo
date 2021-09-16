@@ -1,115 +1,120 @@
 'use strict'
 
 const winston = require('winston')
-const logger = winston.createLogger({transports: [new winston.transports.Console()]})
+const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
 const _ = {
-    unset: require('lodash.unset')
-  }
+  unset: require('lodash.unset')
+}
 
 const validate = require('./lib/validate')
 const authorize = require('./lib/authorize')
 const rateLimiter = require('./lib/rateLimiter')
 const requestCounter = require('./lib/requestCounter')
-const ip2geo  = require('./lib/ip2geo')
-const ip2asn  = require('./lib/ip2asn')
-const utilities  = require('./utility/utilities')
+const ip2geo = require('./lib/ip2geo')
+const ip2asn = require('./lib/ip2asn')
+const utilities = require('./utility/utilities')
 
 const lookup = async (event, context) => {
-    const requestId = context.awsRequestId
-    const start = new Date()
-    const payload = {}
-    const response = {}
-    const request = utilities.enrichRequest(event, context)
+  const requestId = context.awsRequestId
+  const start = new Date()
+  const payload = {}
+  const response = {}
+  const request = utilities.enrichRequest(event, context)
 
-    let {ip, key} = event.queryStringParameters || {}
-    if (!ip) {
-        ip = event['requestContext']['identity']['sourceIp']
-    }
-    //loadTest(ip, key)   // uncomment for quick and dirty load testing
-    request.lookup_ip = ip
-    utilities.setResponseHeadersCORS(response)   // enable CORS in api gateway when using lambda proxy integration
+  let { ip, key } = event.queryStringParameters || {}
+  if (!ip) {
+    ip = event.requestContext.identity.sourceIp
+  }
+  // loadTest(ip, key)   // uncomment for quick and dirty load testing
+  request.lookup_ip = ip
+  utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
-    return Promise.all([validate.ip(ip, requestId), validate.key(key, requestId) ])
-    .then(() =>{
-        return authorize.key(key, requestId)})
-    .then((authorizeResult) =>{
-        return rateLimiter.limit(key, authorizeResult, response, requestId)})
+  return Promise.all([validate.ip(ip, requestId), validate.key(key, requestId)])
     .then(() => {
-        return Promise.all([requestCounter.increment(key, requestId), ip2geo.lookup(ip, requestId), ip2asn.lookup(ip, requestId)])})
+      return authorize.key(key, requestId)
+    })
+    .then((authorizeResult) => {
+      return rateLimiter.limit(key, authorizeResult, response, requestId)
+    })
+    .then(() => {
+      return Promise.all([requestCounter.increment(key, requestId), ip2geo.lookup(ip, requestId), ip2asn.lookup(ip, requestId)])
+    })
     .then(([requestCounterResult, ip2geoResult, ip2asnResult]) => {
-        createSuccessResponse(request, response, payload, ip2geoResult, ip2asnResult, start)
+      createSuccessResponse(request, response, payload, ip2geoResult, ip2asnResult, start)
     })
     .catch((error) => {
-        logger.log({requestId, level: 'error', message: `handler.lookup - error: ${error}  event: ${JSON.stringify(event)}`})
-        createErrorResponse(request, response, payload, error, start)
+      logger.log({ requestId, level: 'error', message: `handler.lookup - error: ${error}  event: ${JSON.stringify(event)}` })
+      createErrorResponse(request, response, payload, error, start)
     })
     .then(() => {
-        payload.key = key  // we want the api key in the logs
-        logger.log({requestId, level: 'info', message: `handler.lookup - response:  ${JSON.stringify(payload)}`})
-        _.unset(payload, 'key')
-        return response
+      payload.key = key // we want the api key in the logs
+      logger.log({ requestId, level: 'info', message: `handler.lookup - response:  ${JSON.stringify(payload)}` })
+      _.unset(payload, 'key')
+      return response
     })
 }
 
 const createErrorResponse = (request, response, payload, err, start) => {
-    payload.time_elapsed = new Date() - start
-    payload.status = "error"
-    payload.status_code = err.code
-    payload.request = request
-    payload.error = {message: err.message, code: err.code}
+  payload.time_elapsed = new Date() - start
+  payload.status = 'error'
+  payload.status_code = err.code
+  payload.request = request
+  payload.error = { message: err.message, code: err.code }
 
-    response.statusCode = err.code
-    response.body = payload
+  response.statusCode = err.code
+  response.body = payload
 }
 
 const createSuccessResponse = (request, response, payload, geoResult, asnResult, start) => {
-    const location = {}
-    const timezone = {}
-    const security = {}
-    const isp = {}
+  const location = {}
+  const timezone = {}
+  const security = {}
+  const isp = {}
 
-    payload.time_elapsed = new Date() - start
-    payload.status = "success"
-    payload.status_code = 200
-    payload.request = request
+  payload.time_elapsed = new Date() - start
+  payload.status = 'success'
+  payload.status_code = 200
+  payload.request = request
 
-    location.ip = geoResult.ip
-    location.latitude = geoResult.latitude
-    location.longitude = geoResult.longitude
-    location.city_name = geoResult.city_name
-    location.region_name = geoResult.subdivision_1_name
-    location.region_iso_code = geoResult.subdivision_1_iso_code
-    location.postal_code = geoResult.postal_code
-    location.country_name = geoResult.country_name
-    location.country_iso_code = geoResult.country_iso_code
-    location.continent_name = geoResult.continent_name
-    location.continent_code = geoResult.continent_code
-    payload.location = location
+  location.ip = geoResult.ip
+  location.latitude = geoResult.latitude
+  location.longitude = geoResult.longitude
+  location.city_name = geoResult.city_name
+  location.region_name = geoResult.subdivision_1_name
+  location.region_iso_code = geoResult.subdivision_1_iso_code
+  location.postal_code = geoResult.postal_code
+  location.country_name = geoResult.country_name
+  location.country_iso_code = geoResult.country_iso_code
+  location.continent_name = geoResult.continent_name
+  location.continent_code = geoResult.continent_code
+  payload.location = location
 
-    timezone.time_zone = geoResult.time_zone
-    timezone.time_zone_abbr = geoResult.time_zone_abbr
-    timezone.time_zone_offset = geoResult.time_zone_offset
-    timezone.time_zone_is_dst = geoResult.time_zone_is_dst
-    timezone.time_zone_current_time = geoResult.time_zone_current_time
-    payload.timezone = timezone
+  timezone.time_zone = geoResult.time_zone
+  timezone.time_zone_abbr = geoResult.time_zone_abbr
+  timezone.time_zone_offset = geoResult.time_zone_offset
+  timezone.time_zone_is_dst = geoResult.time_zone_is_dst
+  timezone.time_zone_current_time = geoResult.time_zone_current_time
+  payload.timezone = timezone
 
-    security.is_anonymous_proxy = geoResult.is_anonymous_proxy
-    security.is_satellite_provider = geoResult.is_satellite_provider
-    payload.security = security
+  security.is_anonymous_proxy = geoResult.is_anonymous_proxy
+  security.is_satellite_provider = geoResult.is_satellite_provider
+  payload.security = security
 
-    isp.asn = asnResult.asn
-    isp.organization = asnResult.organization
-    payload.isp = isp
+  isp.asn = asnResult.asn
+  isp.organization = asnResult.organization
+  payload.isp = isp
 
-    response.statusCode = 200
-    response.body = payload
+  response.statusCode = 200
+  response.body = payload
 }
 
 /* istanbul ignore next */
+/* eslint-disable no-unused-vars */
 const loadTest = (ip, key) => {
-    const ipInt = require('ip-to-int')
-    ip = ipInt(Math.floor(Math.random() * Math.floor(4294967290))).toIP()
-    key = process.env.VALID_KEY
+  const ipInt = require('ip-to-int')
+  ip = ipInt(Math.floor(Math.random() * Math.floor(4294967290))).toIP()
+  key = process.env.VALID_KEY
 }
+/* eslint-enable no-unused-vars */
 
-module.exports = {lookup}
+module.exports = { lookup }

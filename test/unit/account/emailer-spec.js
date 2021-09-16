@@ -1,7 +1,9 @@
 'use strict'
 
+/* eslint-env mocha */
 const expect  = require("chai").expect
 const proxyquire = require('proxyquire')
+
 const _ = {
     cloneDeep: require('lodash.clonedeep'),
     unset: require('lodash.unset')

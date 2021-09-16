@@ -28,7 +28,6 @@ const unit = (fns) => {
     },
     'aws-sdk': {
       SNS: class {
-        constructor () {}
         publish (data) {
           return { promise: fns.promise || (it => it) }
         }

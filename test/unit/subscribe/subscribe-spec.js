@@ -10,7 +10,6 @@ const unit = (fns) => {
   return proxyquire('../../../subscribe/subscribe', {
     'aws-sdk': {
       Lambda: class {
-        constructor () {}
         invoke (data) {
           return { promise: fns.promise || (it => it) }
         }

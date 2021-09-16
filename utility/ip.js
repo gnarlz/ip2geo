@@ -28,8 +28,8 @@ const numeric = (ip, requestId) => {
     const sides = ip.split('::')
     let groupsPresent = 0
 
-    sides.map((side) => {
-      return groupsPresent += side.split(':').length
+    sides.forEach((side) => {
+      groupsPresent += side.split(':').length
     })
 
     fullAddress += sides[0] + ':'
@@ -43,7 +43,7 @@ const numeric = (ip, requestId) => {
       while (groups[i].length < validGroupSize) {
         groups[i] = '0' + groups[i]
       }
-      expandedAddress += (i != validGroupCount - 1) ? groups[i] + ':' : groups[i]
+      expandedAddress += (i !== validGroupCount - 1) ? groups[i] + ':' : groups[i]
     }
 
     const parts = []

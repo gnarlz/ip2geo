@@ -9,7 +9,7 @@ const ip = require('../../../utility/ip')
 describe('utility/ip test', () => {
   it('ip.numeric() should throw for an invalid ipv4 and ipv6 addresses', () => {
     const invalidIPs = ['3456', 'foo', '100.200.300.400', '2001:db8:3333:4444:5555:6666:7777:888x']
-    invalidIPs.map((ipAddress) => {
+    invalidIPs.forEach((ipAddress) => {
       const result = ip.numeric(ipAddress)
       expect(result).to.be.an('error')
       expect(result.message).to.contain('Invalid IP Address included in the request')

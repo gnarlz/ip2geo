@@ -13,14 +13,13 @@ const postgresOpts = {
   database: process.env.POSTGRES_DB ? process.env.POSTGRES_DB : 'ip2geo'
 }
 
-let client 
-  /* istanbul ignore next */
-if (process.env.NODE_ENV != 'unit') {
+let client
+/* istanbul ignore next */
+if (process.env.NODE_ENV !== 'unit') {
   logger.log({ level: 'info', message: `postgres-client - opts: ${JSON.stringify(postgresOpts, null, 2)}` })
   const client = new Client(postgresOpts)
 
   client.connect(err => {
-  
     if (err) {
       logger.log({ level: 'error', message: `postgres-client - error: ${err}` })
     } else {

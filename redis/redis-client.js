@@ -10,9 +10,9 @@ const redisOpts = {
   password: process.env.REDIS_PASS
 }
 
-let client 
+let client
 /* istanbul ignore next */
-if (process.env.NODE_ENV != 'unit') {
+if (process.env.NODE_ENV !== 'unit') {
   logger.log({ level: 'info', message: `redis-client - opts: ${JSON.stringify(redisOpts, null, 2)}` })
   const client = redis.createClient(redisOpts)
   client.on('connect', function () {

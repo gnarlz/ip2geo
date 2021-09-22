@@ -134,7 +134,6 @@ describe('handler.lookup test', () => {
     })
     return handlerProxy.lookup(validEvent, validContext)
       .then(response => {
-        console.log(`response: ${JSON.stringify(response, null, 2)}`)
         validateSuccessResponse(response)
       })
   })
@@ -153,7 +152,6 @@ describe('handler.lookup test', () => {
 
     return handlerProxy.lookup(validEventNoIP, validContext)
       .then(response => {
-        console.log(`response: ${JSON.stringify(response, null, 2)}`)
         validateSuccessResponse(response)
       })
   })
@@ -302,7 +300,6 @@ describe('handler.lookup test', () => {
 
     return handlerProxy.lookup(validEvent, validContext)
       .then(response => {
-        console.log(`response: ${JSON.stringify(response, null, 2)}`)
         validateSuccessResponse(response)
       })
   })

@@ -10,15 +10,18 @@ const redisOpts = {
   password: process.env.REDIS_PASS
 }
 
-// connects to local redis if opts empty
-logger.log({ level: 'info', message: `redis-client - opts: ${JSON.stringify(redisOpts, null, 2)}` })
-const client = redis.createClient(redisOpts)
-client.on('connect', function () {
-  logger.log({ level: 'info', message: 'redis-client - connected' })
-})
+let client 
 /* istanbul ignore next */
-client.on('error', function (err) {
-  logger.log({ level: 'error', message: `redis-client - error: ${err}` })
-})
+if (process.env.NODE_ENV != 'unit') {
+  logger.log({ level: 'info', message: `redis-client - opts: ${JSON.stringify(redisOpts, null, 2)}` })
+  const client = redis.createClient(redisOpts)
+  client.on('connect', function () {
+    logger.log({ level: 'info', message: 'redis-client - connected' })
+  })
+  /* istanbul ignore next */
+  client.on('error', function (err) {
+    logger.log({ level: 'error', message: `redis-client - error: ${err}` })
+  })
+}
 
 module.exports = client

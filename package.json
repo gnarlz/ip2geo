@@ -15,7 +15,8 @@
     "start-postgres": "sh test/postgres-local.sh",
     "stop-postgres": "docker stop ip2geo-postgres",
     "clean-postgres": "docker stop ip2geo-postgres && docker rm ip2geo-postgres",
-    "unit": "if test \"$HOME\" != \"/home/appuser\" ; then npm run start-redis ; npm run start-postgres; fi && NODE_CONFIG_STRICT_MODE=1 NODE_ENV=unit nyc mocha --exit --timeout=1000000 'test/unit/**/*-spec.js'"
+    "unit": "NODE_CONFIG_STRICT_MODE=1 NODE_ENV=unit nyc mocha --exit --timeout=1000000 'test/unit/**/*-spec.js'",
+    "int": "if test \"$HOME\" != \"/home/appuser\" ; then npm run start-redis ; npm run start-postgres; fi && NODE_CONFIG_STRICT_MODE=1 NODE_ENV=unit nyc mocha --exit --timeout=1000000 'test/integration/**/*-spec.js'"
   },
   "keywords": [],
   "author": "",

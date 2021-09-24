@@ -21,6 +21,7 @@ const growth = async (event, context) => {
   return subscribe(event, context, process.env.STRIPE_GROWTH_PLAN)
 }
 
+// TODO: add JSDoc comment
 const subscribe = async (event, context, planID) => {
   const requestId = context.awsRequestId
   const subscriptionData = {}

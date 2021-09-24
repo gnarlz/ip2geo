@@ -23,30 +23,9 @@ const logger = winston.createLogger({ transports: [new winston.transports.Consol
 const run = async (event) => {
   const requestId = uuidv4()
   logger.log({ requestId, level: 'info', message: 'authorization.run - start' })
-
-  // find all keys that are over their monthly limit AND whose latest row in key.authorization is TRUE
-  // (we dont want to clobber it is it is already FALSE)
-  const sql = 'SELECT ' +
-        'key.limit.key, ' +
-        'key.limit.limit_, ' +
-        'key.limit.ratelimit_max, ' +
-        'key.limit.ratelimit_duration, ' +
-        'key.limit.updated_at as limit_updated_date, ' +
-        'key.request.total as request_total, ' +
-        'key.authorization.authorized, ' +
-        'key.authorization.updated_at as authorization_updated_date ' +
-        'FROM ' +
-        'key.limit, key.request, key.authorization ' +
-        'WHERE ' +
-        'key.limit.updated_at = (SELECT MAX(c.updated_at) FROM key.limit c WHERE key.limit.key = c.key)  and ' +
-        'key.authorization.updated_at = (SELECT MAX(d.updated_at) FROM key.authorization d WHERE key.authorization.key = d.key) ' +
-        'and key.limit.key=key.request.key ' +
-        'and key.authorization.key=key.request.key ' +
-        'and key.request.total > key.limit.limit_ ' +
-        'and key.authorization.authorized is true'
-
   let rows
-  return postgresClient.query(sql)
+
+  return postgresClient.query(findOverLimitKeysSQL)
     .then(result => {
       logger.log({ requestId, level: 'info', message: `authorization.run - found  ${result.rows.length} keys that need to be expired` })
       rows = result.rows
@@ -121,6 +100,26 @@ const insertPostgresAuthorization = async (row, requestId) => {
     })
 }
 
+// find all keys that are over their monthly limit AND whose latest row in key.authorization is TRUE
+// (we dont want to clobber it is it is already FALSE)
+const findOverLimitKeysSQL = 'SELECT ' +
+    'key.limit.key, ' +
+    'key.limit.limit_, ' +
+    'key.limit.ratelimit_max, ' +
+    'key.limit.ratelimit_duration, ' +
+    'key.limit.updated_at as limit_updated_date, ' +
+    'key.request.total as request_total, ' +
+    'key.authorization.authorized, ' +
+    'key.authorization.updated_at as authorization_updated_date ' +
+    'FROM ' +
+    'key.limit, key.request, key.authorization ' +
+    'WHERE ' +
+    'key.limit.updated_at = (SELECT MAX(c.updated_at) FROM key.limit c WHERE key.limit.key = c.key)  and ' +
+    'key.authorization.updated_at = (SELECT MAX(d.updated_at) FROM key.authorization d WHERE key.authorization.key = d.key) ' +
+    'and key.limit.key=key.request.key ' +
+    'and key.authorization.key=key.request.key ' +
+    'and key.request.total > key.limit.limit_ ' +
+    'and key.authorization.authorized is true'
 const message = 'Your API key has been suspended because you have exceeded your plans monthly request limit. Please contact support@ip2geo.co to resolve this issue.'
 
 module.exports = { run, setRedisAuthorization, insertPostgresAuthorization }

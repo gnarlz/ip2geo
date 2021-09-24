@@ -14,6 +14,7 @@ const ip2geo = require('./lib/ip2geo')
 const ip2asn = require('./lib/ip2asn')
 const utilities = require('./utility/utilities')
 
+// TODO: add JSDoc comment
 const lookup = async (event, context) => {
   const requestId = context.awsRequestId
   const start = new Date()

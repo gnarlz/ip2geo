@@ -1,22 +1,17 @@
 # hidden files
 .DS_Store
-.idea
 
 # hidden directories
 .serverless
 .nyc_output
 
 # files
-safe/notes
-sensitive
-git-notes
-git-cheatsheet.pdf
 test/config.json
+package-lock.json
 
 # directories
 node_modules
-jspm_packages
 tools
 safe
-coverage/
+coverage
 

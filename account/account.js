@@ -35,8 +35,6 @@ const {
  * @param {String} event.planID (required)
  * @param {String} event.plan_name (required)
  * @param {Object} event.queryStringParameters (required)
- * @param {Object} event.requestContext (required)
- * @param {Object} event.requestContext.identity (required)
  * @param {String} event.requestContext.identity.sourceIp (required)
  * @param {Array} [event.headers] (required)
  * @param {Object} context (required)

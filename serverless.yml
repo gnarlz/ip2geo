@@ -84,6 +84,10 @@ functions:
       memorySize: 256
       events:
         - schedule: rate(60 minutes)
+        - http: # this exists only to support testing
+            path: test/authorization
+            method: post
+            cors: true
 
   subscribe-mvp:
         handler: subscribe/subscribe.mvp

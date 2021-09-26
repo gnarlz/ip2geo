@@ -14,7 +14,20 @@ const ip2geo = require('./lib/ip2geo')
 const ip2asn = require('./lib/ip2asn')
 const utilities = require('./utility/utilities')
 
-// TODO: add JSDoc comment
+/**
+ * Returns geo, asn, timezone and security data for an ip address.
+ * If an ip address is included in the queryStringParameters, it will be used for the lookup.
+ * Otherwise the ip address of the consumer making the request will be used for the lookup.
+ * @param {Object} event (required)
+ * @param {Object} event.queryStringParameters.ip (optional)
+ * @param {Object} event.queryStringParameters.key (required) The api key for the request
+ * @param {String} event.requestContext.identity.sourceIp (required)
+ * @param {Array} [event.headers] (required)
+ * @param {Object} context (required)
+ * @param {String} context.awsRequestId (required)
+ * @return {Object} Well formed JSON response containing geo, asn and security data for an ip address.
+ * @public
+ */
 const lookup = async (event, context) => {
   const requestId = context.awsRequestId
   const start = new Date()

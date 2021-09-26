@@ -21,7 +21,18 @@ const growth = async (event, context) => {
   return subscribe(event, context, process.env.STRIPE_GROWTH_PLAN)
 }
 
-// TODO: add JSDoc comment
+/**
+ * Creates a subscription @ Stripe, and then a corresponding account @ ip2geo.
+ * 
+ * @param {Object} event (required)
+ * @param {Object} event.body.plan_name (required)
+ * @param {Object} event.body.stripeToken (required)
+ * @param {Object} event.body.stripeEmail (required)
+ * @param {Object} context (required)
+ * @param {String} context.awsRequestId (required)
+ * @return {Object} Well formed JSON response with a 301 redirect to indicate success or failure to the UI
+ * @public
+ */
 const subscribe = async (event, context, planID) => {
   const requestId = context.awsRequestId
   const subscriptionData = {}
@@ -61,14 +72,14 @@ const subscribe = async (event, context, planID) => {
       logger.log({ requestId, level: 'info', message: `subscribe.subscribe - attempting to create ip2geo account for subscriptionData: ${JSON.stringify(subscriptionData)}` })
 
       // TODO: not best practice, refactor
-      const lambda = new AWS.Lambda()
+      const createAccount = new AWS.Lambda()
       const params = {
         FunctionName: process.env.CREATE_ACCOUNT_FUNCTION_NAME,
         InvocationType: 'RequestResponse',
         LogType: 'Tail',
         Payload: JSON.stringify(subscriptionData)
       }
-      return lambda.invoke(params).promise() // this always returns a well formed JSON response
+      return createAccount.invoke(params).promise() // this always returns a well formed JSON response
     })
     .then((accountCreationResponse) => {
       if (accountCreationResponse.statusCode === http.OK) {

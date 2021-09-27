@@ -29,6 +29,8 @@ const utilities = require('./utility/utilities')
  * @public
  */
 const lookup = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
   const requestId = context.awsRequestId
   const start = new Date()
   const payload = {}

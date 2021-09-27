@@ -23,7 +23,7 @@ const growth = async (event, context) => {
 
 /**
  * Creates a subscription @ Stripe, and then a corresponding account @ ip2geo.
- * 
+ *
  * @param {Object} event (required)
  * @param {Object} event.body.plan_name (required)
  * @param {Object} event.body.stripeToken (required)
@@ -34,6 +34,8 @@ const growth = async (event, context) => {
  * @public
  */
 const subscribe = async (event, context, planID) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
   const requestId = context.awsRequestId
   const subscriptionData = {}
   subscriptionData.planID = planID

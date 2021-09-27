@@ -17,6 +17,7 @@ const {
 
 /**
  * Creates an ip2geo account.
+ * The second step in creating a new subscription.
  * Invoked by a stripe overlay POSTing to subscribe/subscribe.js
  * Implementation Details:
  *      Validates data
@@ -43,6 +44,8 @@ const {
  * @public
  */
 const create = async (event, context) => {
+  context.callbackWaitsForEmptyEventLoop = false
+
   const start = new Date()
   const requestId = context.awsRequestId
   const request = utilities.enrichRequest(event, context)

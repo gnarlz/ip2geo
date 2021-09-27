@@ -3,6 +3,18 @@
 /* eslint-env mocha */
 const expect = require('chai').expect
 const proxyquire = require('proxyquire')
+const uuidv4 = require('uuid/v4')
+
+const validContext = { awsRequestId: uuidv4() }
+const validEvent = {
+  queryStringParameters: {},
+  requestContext: {
+    identity: {
+      sourceIp: process.env.SOURCE_IP
+    }
+  },
+  headers: {}
+}
 
 const unit = (fns) => {
   return proxyquire('../../../scheduled/authorization', {
@@ -89,7 +101,7 @@ describe('scheduled/authorization test', () => {
       .catch((error) => { expect(error.message).to.be.contain('redisClientSendCommand error') })
   })
 
-  it('should return null when run() is successful (keys to expire)', () => {
+  it('should return well formed success response when run() is successful (keys to expire)', () => {
     const rows = [
       { key: 'abc123', request_total: 1001, limit_: 1000, ratelimit_max: 5, ratelimit_duration: 60 },
       { key: 'def456', request_total: 1002, limit_: 1001, ratelimit_max: 6, ratelimit_duration: 61 },
@@ -105,10 +117,13 @@ describe('scheduled/authorization test', () => {
         }
       }
     })
-    return authorizationProxy.run({})
-      .then((response) => { expect(response).to.be.a('null') })
+    return authorizationProxy.run(validEvent, validContext)
+    .then((response) => {
+      expect(response).to.be.a('object')
+      expect(response.statusCode).to.equal(200)
+    })
   })
-  it('should return null when run() is successful (no keys to expire)', () => {
+  it('should return well formed success response when run() is successful (no keys to expire)', () => {
     const rows = []
     const authorizationProxy = unit({
       bind: async () => { return null },
@@ -120,11 +135,14 @@ describe('scheduled/authorization test', () => {
         }
       }
     })
-    return authorizationProxy.run({})
-      .then((response) => { expect(response).to.be.a('null') })
+    return authorizationProxy.run(validEvent, validContext)
+    .then((response) => {
+      expect(response).to.be.a('object')
+      expect(response.statusCode).to.equal(200)
+    })
   })
 
-  it('should throw when run() is not successful (postgres SELECT query throws)', () => {
+  it('should return well formed error response when run() is not successful (postgres SELECT query throws)', () => {
     const authorizationProxy = unit({
       bind: async () => { return null },
       query: async (sql) => {
@@ -135,11 +153,13 @@ describe('scheduled/authorization test', () => {
         }
       }
     })
-    return authorizationProxy.run({})
-      .then((response) => { throw new Error('should have thrown error, test failed') })
-      .catch((error) => { expect(error.message).to.be.contain('select error') })
+    return authorizationProxy.run(validEvent, validContext)
+    .then((response) => {
+      expect(response).to.be.a('object')
+      expect(response.statusCode).to.equal(500)
+    })
   })
-  it('should throw when run() is not successful (postgres INSERT query throws)', () => {
+  it('should return well formed error response when run() is not successful (postgres INSERT query throws)', () => {
     const rows = [
       { key: 'abc123', request_total: 1001, limit_: 1000, ratelimit_max: 5, ratelimit_duration: 60 },
       { key: 'def456', request_total: 1002, limit_: 1001, ratelimit_max: 6, ratelimit_duration: 61 },
@@ -155,11 +175,13 @@ describe('scheduled/authorization test', () => {
         }
       }
     })
-    return authorizationProxy.run({})
-      .then((response) => { throw new Error('should have thrown error, test failed') })
-      .catch((error) => { expect(error.message).to.be.contain('insert error') })
+    return authorizationProxy.run(validEvent, validContext)
+    .then((response) => {
+      expect(response).to.be.a('object')
+      expect(response.statusCode).to.equal(500)
+    })
   })
-  it('should throw when run() is not successful (redis SET throws)', () => {
+  it('should return well formed error response when run() is not successful (redis SET throws)', () => {
     const rows = [
       { key: 'abc123', request_total: 1001, limit_: 1000, ratelimit_max: 5, ratelimit_duration: 60 },
       { key: 'def456', request_total: 1002, limit_: 1001, ratelimit_max: 6, ratelimit_duration: 61 },
@@ -175,8 +197,10 @@ describe('scheduled/authorization test', () => {
         }
       }
     })
-    return authorizationProxy.run({})
-      .then((response) => { throw new Error('should have thrown error, test failed') })
-      .catch((error) => { expect(error.message).to.be.contain('set error') })
+    return authorizationProxy.run(validEvent, validContext)
+    .then((response) => {
+      expect(response).to.be.a('object')
+      expect(response.statusCode).to.equal(500)
+    })
   })
 })

@@ -1,8 +1,8 @@
 'use strict'
 
-const config = require('./config.json')
+const config = require('../../safe/secret/config.json')
 
-if (!process.env.VALID_KEY) {
+const run = () => {
   process.env.VALID_KEY = config.VALID_KEY
   process.env.REVOKED_KEY = config.REVOKED_KEY
   process.env.EXCEEDED_PLAN_LIMIT_KEY = config.EXCEEDED_PLAN_LIMIT_KEY
@@ -46,6 +46,7 @@ if (!process.env.VALID_KEY) {
   process.env.TEXT_TEMPLATE_BUCKET_NAME = config.TEXT_TEMPLATE_BUCKET_NAME
   process.env.TEXT_TEMPLATE_KEY_NAME = config.TEXT_TEMPLATE_KEY_NAME
 
+  /*
   console.log('==========================================================================')
   console.log('valid API key for this test: ' + process.env.VALID_KEY)
   console.log('revoked API key for this test: ' + process.env.REVOKED_KEY)
@@ -84,7 +85,7 @@ if (!process.env.VALID_KEY) {
   console.log('s3 text template key name for this test: ' + process.env.TEXT_TEMPLATE_KEY_NAME)
 
   console.log('==========================================================================')
-
-  // const setup = require('./integration/lib/setup')
-  // setup.run();     // TODO:  uncomment
+  */
 }
+
+module.exports = { run }

@@ -118,10 +118,10 @@ describe('scheduled/authorization test', () => {
       }
     })
     return authorizationProxy.run(validEvent, validContext)
-    .then((response) => {
-      expect(response).to.be.a('object')
-      expect(response.statusCode).to.equal(200)
-    })
+      .then((response) => {
+        expect(response).to.be.a('object')
+        expect(response.statusCode).to.equal(200)
+      })
   })
   it('should return well formed success response when run() is successful (no keys to expire)', () => {
     const rows = []
@@ -136,10 +136,10 @@ describe('scheduled/authorization test', () => {
       }
     })
     return authorizationProxy.run(validEvent, validContext)
-    .then((response) => {
-      expect(response).to.be.a('object')
-      expect(response.statusCode).to.equal(200)
-    })
+      .then((response) => {
+        expect(response).to.be.a('object')
+        expect(response.statusCode).to.equal(200)
+      })
   })
 
   it('should return well formed error response when run() is not successful (postgres SELECT query throws)', () => {
@@ -154,10 +154,10 @@ describe('scheduled/authorization test', () => {
       }
     })
     return authorizationProxy.run(validEvent, validContext)
-    .then((response) => {
-      expect(response).to.be.a('object')
-      expect(response.statusCode).to.equal(500)
-    })
+      .then((response) => {
+        expect(response).to.be.a('object')
+        expect(response.statusCode).to.equal(500)
+      })
   })
   it('should return well formed error response when run() is not successful (postgres INSERT query throws)', () => {
     const rows = [
@@ -176,10 +176,10 @@ describe('scheduled/authorization test', () => {
       }
     })
     return authorizationProxy.run(validEvent, validContext)
-    .then((response) => {
-      expect(response).to.be.a('object')
-      expect(response.statusCode).to.equal(500)
-    })
+      .then((response) => {
+        expect(response).to.be.a('object')
+        expect(response.statusCode).to.equal(500)
+      })
   })
   it('should return well formed error response when run() is not successful (redis SET throws)', () => {
     const rows = [
@@ -198,9 +198,9 @@ describe('scheduled/authorization test', () => {
       }
     })
     return authorizationProxy.run(validEvent, validContext)
-    .then((response) => {
-      expect(response).to.be.a('object')
-      expect(response.statusCode).to.equal(500)
-    })
+      .then((response) => {
+        expect(response).to.be.a('object')
+        expect(response.statusCode).to.equal(500)
+      })
   })
 })

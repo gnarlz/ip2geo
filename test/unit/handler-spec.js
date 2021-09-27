@@ -36,8 +36,8 @@ const validEvent = {
 }
 
 const validGEOResponse = {
-  latitude: '70.123',
-  longitude: '120.567',
+  latitude: 70.123,
+  longitude: 120.567,
   city_name: 'Madison',
   subdivision_1_name: 'Wisconsin',
   subdivision_1_iso_code: 'WI',
@@ -49,10 +49,10 @@ const validGEOResponse = {
   time_zone: 'America/Chicago',
   time_zone_abbr: 'CDT',
   time_zone_offset: -21600,
-  time_zone_is_dst: 1,
+  time_zone_is_dst: true,
   time_zone_current_time: '2021-09-12T16:46:09-06:00',
-  is_anonymous_proxy: 't',
-  is_satellite_provider: 't'
+  is_anonymous_proxy: true,
+  is_satellite_provider: true
 }
 const validASNResponse = {
   asn: '456',
@@ -321,8 +321,8 @@ const validateSuccessResponse = (response) => {
   expect(response.body.error).to.be.a('undefined')
 
   expect(response.body.location).to.be.a('object')
-  expect(response.body.location.latitude).to.be.a('string')
-  expect(response.body.location.longitude).to.be.a('string')
+  expect(response.body.location.latitude).to.be.a('number')
+  expect(response.body.location.longitude).to.be.a('number')
   expect(response.body.location.city_name).to.be.a('string')
   expect(response.body.location.region_name).to.be.a('string')
   expect(response.body.location.region_iso_code).to.be.a('string')
@@ -336,12 +336,12 @@ const validateSuccessResponse = (response) => {
   expect(response.body.timezone.time_zone).to.be.a('string')
   expect(response.body.timezone.time_zone_abbr).to.be.a('string')
   expect(response.body.timezone.time_zone_offset).to.be.a('number')
-  expect(response.body.timezone.time_zone_is_dst).to.be.a('number')
+  expect(response.body.timezone.time_zone_is_dst).to.be.a('boolean')
   expect(response.body.timezone.time_zone_current_time).to.be.a('string')
 
   expect(response.body.security).to.be.a('object')
-  expect(response.body.security.is_anonymous_proxy).to.be.a('string')
-  expect(response.body.security.is_satellite_provider).to.be.a('string')
+  expect(response.body.security.is_anonymous_proxy).to.be.a('boolean')
+  expect(response.body.security.is_satellite_provider).to.be.a('boolean')
 
   expect(response.body.isp).to.be.a('object')
   expect(response.body.isp.asn).to.be.a('string')

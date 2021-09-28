@@ -45,7 +45,7 @@ describe('lib/authorize test', () => {
       .catch((error) => { expect(error.message).to.contain('API key is unrecognized') })
   })
   it('should throw when get is unsuccessful (redis throws an error)', () => {
-    const authorizeProxy = unit({ bind: async () => { throw new Error() } })
+    const authorizeProxy = unit({ bind: async () => { throw new Error('redis error') } })
     return authorizeProxy.key('def456', 'requestId-12345')
       .then((response) => { throw new Error('should have thrown error, test failed') })
       .catch((error) => { expect(error.message).to.contain('Internal server error') })

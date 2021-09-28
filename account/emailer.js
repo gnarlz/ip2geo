@@ -6,18 +6,15 @@ const winston = require('winston')
 const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
 
 const sendNewSubscriberEmail = async (accountData, requestId) => {
-  logger.log({ requestId, level: 'info', message: `account.sendNewSubscriberEmail - accountData: ${JSON.stringify(accountData)}` })
+  logger.log({ requestId, level: 'info', src: 'account.sendNewSubscriberEmail',  accountData })
 
   return Promise.all([getHtmlContent(accountData, requestId), getTextContent(accountData, requestId)])
     .then((htmlContent, textContent) => {
       return sendEmail(accountData, htmlContent, textContent, requestId)
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.sendNewSubscriberEmail - error sending email for account: ${JSON.stringify(accountData)}   error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'account.sendNewSubscriberEmail', message: 'error sending email for account', accountData, error: error.message })
       throw error
-    })
-    .then(() => {
-      return null
     })
 }
 
@@ -38,7 +35,7 @@ const getHtmlContent = async (accountData, requestId) => {
       return htmlTemplate
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.getHtmlContent - error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'account.getHtmlContent', error: error.message })
       throw error
     })
 }
@@ -59,14 +56,13 @@ const getTextContent = async (accountData, requestId) => {
       return textTemplate
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.getTextContent - error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'account.getTextContent', error: error.message })
       throw error
     })
 }
 
 const sendEmail = async (accountData, htmlContent, textContent, requestId) => {
   const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY)
-  // TODO: sign up for new postmark account and integrate back into the stack
 
   const message = {
     From: 'support@ip2geo.co',
@@ -81,11 +77,11 @@ const sendEmail = async (accountData, htmlContent, textContent, requestId) => {
   }
   return client.sendEmail(message)
     .then((data) => {
-      logger.log({ requestId, level: 'info', message: `account.sendEmail - success for accountData: ${JSON.stringify(accountData)} - ${data}` })
+      logger.log({ requestId, level: 'info', src: 'account.sendEmail',  message: 'successfiully sent email', accountData })
       return null
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.sendEmail - error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'account.sendEmail', error: error.message })
       throw error
     })
 }

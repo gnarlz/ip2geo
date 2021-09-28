@@ -1,12 +1,11 @@
 'use strict'
 
+const AWS = require('aws-sdk')
 const util = require('util')
 const winston = require('winston')
 const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
-
 const redisClient = require('../redis/redis-client')
 const postgresClient = require('../postgres/postgres-client')
-const AWS = require('aws-sdk')
 
 const insertPostgresKeyAccount = async (accountData, requestId) => {
   // TODO: refactotor with sql as tokens
@@ -18,11 +17,11 @@ const insertPostgresKeyAccount = async (accountData, requestId) => {
         accountData.email + "', " +
         'true, now(), now())')
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `account.create - inserted row into key.account    key: ${accountData.key} ` })
+      logger.log({ requestId, level: 'info', src: 'helper.insertPostgresKeyAccount', key: accountData.key, message: 'success' })
       return null
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `account.create - error inserting into key.account    key: ${accountData.key}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.insertPostgresKeyAccount', key: accountData.key, message: 'error', error: error.message })
       throw error
     })
 }
@@ -31,11 +30,11 @@ const insertPostgresKeyRequest = async (accountData, requestId) => {
   return postgresClient.query("insert into key.request (key,total,created_at,updated_at) values ('" +
         accountData.key + "', 0, now(), now())")
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `account.create - inserted row into key.request    key: ${accountData.key} ` })
+      logger.log({ requestId, level: 'info', src: 'helper.insertPostgresKeyRequest', key: accountData.key, message: 'success' })
       return null
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `account.create - error inserting into key.request    key: ${accountData.key}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.insertPostgresKeyRequest', key: accountData.key, message: 'error', error: error.message })
       throw error
     })
 }
@@ -48,11 +47,11 @@ const insertPostgresKeyLimit = async (accountData, requestId) => {
         (accountData.ratelimit_max ? accountData.ratelimit_max : null) + ', ' +
         (accountData.ratelimit_duration ? accountData.ratelimit_duration : null) + ')')
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `account.create - inserted row into key.limit    key: ${accountData.key} ` })
+      logger.log({ requestId, level: 'info', src: 'helper.insertPostgresKeyLimit', key: accountData.key, message: 'success' })
       return null
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `account.create - error inserting into key.limit    key: ${accountData.key}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.insertPostgresKeyLimit', key: accountData.key, message: 'error', error: error.message })
       throw error
     })
 }
@@ -64,11 +63,11 @@ const insertPostgresKeyAuthorization = async (accountData, requestId) => {
         (accountData.ratelimit_max ? accountData.ratelimit_max : null) + ', ' +
         (accountData.ratelimit_duration ? accountData.ratelimit_duration : null) + ", '" + 'Account creation' + "')")
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `account.create - inserted row into key.authorization    key: ${accountData.key} ` })
+      logger.log({ requestId, level: 'info', src: 'helper.insertPostgresKeyAuthorization', key: accountData.key, message: 'success' })
       return null
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `account.create - error inserting into key.authorization    key: ${accountData.key}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.insertPostgresKeyAuthorization', key: accountData.key, message: 'error', error: error.message })
       throw error
     })
 }
@@ -91,11 +90,11 @@ const insertRedisAuthorization = async (accountData, requestId) => {
   const redisClientSendCommand = util.promisify(redisClient.send_command).bind(redisClient)
   return redisClientSendCommand('SET', args)
     .then(() => {
-      logger.log({ requestId, level: 'info', message: `account.create - set authorization in redis    key: ${akey}` })
+      logger.log({ requestId, level: 'info', src: 'helper.insertRedisAuthorization', key: akey, message: 'success' })
       return null
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.create - error attempting to set authorization in redis    key: ${akey}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.insertRedisAuthorization', key: akey, message: 'error', error: error.message })
       throw error
     })
 }
@@ -110,11 +109,11 @@ const sendAccountCreationTextAndEmail = async (accountData, requestId) => {
 
   return snsPublishPromise
     .then((data) => {
-      logger.log({ requestId, level: 'info', message: `SNS message ${params.Message} sent to the topic ${params.TopicArn} with MessageID ${data.MessageId}` })
+      logger.log({ requestId, level: 'info', src: 'helper.sendAccountCreationTextAndEmail', key: accountData.key, message: 'success' })
       return null
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `account.sendAccountCreationTextAndEmail - failed to send sns    accountData: ${JSON.stringify(accountData)}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'helper.sendAccountCreationTextAndEmail', key: accountData.key, message: 'error', error: error.message })
       return null // throw this error on the floor - its annoying but not life threatening
     })
 }

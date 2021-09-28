@@ -6,7 +6,7 @@ const winston = require('winston')
 const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
 
 const sendNewSubscriberEmail = async (accountData, requestId) => {
-  logger.log({ requestId, level: 'info', src: 'account.sendNewSubscriberEmail',  accountData })
+  logger.log({ requestId, level: 'info', src: 'account.sendNewSubscriberEmail', accountData })
 
   return Promise.all([getHtmlContent(accountData, requestId), getTextContent(accountData, requestId)])
     .then((htmlContent, textContent) => {
@@ -77,7 +77,7 @@ const sendEmail = async (accountData, htmlContent, textContent, requestId) => {
   }
   return client.sendEmail(message)
     .then((data) => {
-      logger.log({ requestId, level: 'info', src: 'account.sendEmail',  message: 'successfiully sent email', accountData })
+      logger.log({ requestId, level: 'info', src: 'account.sendEmail', message: 'successfully sent email', accountData })
       return null
     })
     .catch((error) => {

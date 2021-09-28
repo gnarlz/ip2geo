@@ -20,15 +20,15 @@ let client
 
 /* istanbul ignore next */
 if (process.env.NODE_ENV !== 'unit') {
-  // logger.log({ level: 'info', message: `redis-client - opts: ${JSON.stringify(redisOpts, null, 2)}` })
+  // logger.log({ level: 'info', src: 'redis/redis-client', opts })
 
   client = redis.createClient(redisOpts)
   client.on('connect', function () {
-    logger.log({ level: 'info', message: 'redis-client - connected' })
+    logger.log({ level: 'info', src: 'redis/redis-client', message: 'connected' })
   })
   /* istanbul ignore next */
   client.on('error', function (err) {
-    logger.log({ level: 'error', message: `redis-client - error: ${err}` })
+    logger.log({ level: 'error', src: 'redis/redis-client', message: 'error', error: err.message })
   })
 }
 

@@ -19,7 +19,7 @@ describe('lib/requestHelper test', () => {
       .then((response) => { expect(response).to.be.a('null') })
   })
   it('should return null when query() is unsuccessful in increment()', () => {
-    const requestCounterProxy = unit({ query: async (data) => { throw new Error() } })
+    const requestCounterProxy = unit({ query: async (data) => { throw new Error('postgres error') } })
     return requestCounterProxy.increment('def456', 'requestId-12345')
       .then((response) => { expect(response).to.be.a('null') })
   })

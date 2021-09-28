@@ -1,11 +1,12 @@
 'use strict'
 
+const http = require('http-codes')
+const _ = {
+  get: require('lodash.get'),
+  set: require('lodash.set')
+}
 const winston = require('winston')
 const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
-const _ = {
-  unset: require('lodash.unset')
-}
-
 const validate = require('./lib/validate')
 const authorize = require('./lib/authorize')
 const rateLimiter = require('./lib/rateLimiter')
@@ -33,7 +34,6 @@ const lookup = async (event, context) => {
 
   const requestId = context.awsRequestId
   const start = new Date()
-  const payload = {}
   const response = {}
   const request = utilities.enrichRequest(event, context)
 
@@ -56,72 +56,74 @@ const lookup = async (event, context) => {
       return Promise.all([requestCounter.increment(key, requestId), ip2geo.lookup(ip, requestId), ip2asn.lookup(ip, requestId)])
     })
     .then(([requestCounterResult, ip2geoResult, ip2asnResult]) => {
-      createSuccessResponse(request, response, payload, ip2geoResult, ip2asnResult, start)
+      populateSuccessResponse(request, response, ip2geoResult, ip2asnResult, start)
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `handler.lookup - error: ${error}  event: ${JSON.stringify(event)}` })
-      createErrorResponse(request, response, payload, error, start)
+      logger.log({ requestId, level: 'error', src: 'handler.lookup', key, response, error, event })
+      populateErrorResponse(request, response, error, start)
     })
     .then(() => {
-      payload.key = key // we want the api key in the logs
-      logger.log({ requestId, level: 'info', message: `handler.lookup - response:  ${JSON.stringify(payload)}` })
-      _.unset(payload, 'key')
+      logger.log({ requestId, level: 'info', src: 'handler.lookup', key, response })
+      const payload = _.get(response, 'body')
+      _.set(response, 'body', JSON.stringify(payload))
       return response
     })
 }
 
-const createErrorResponse = (request, response, payload, err, start) => {
-  payload.time_elapsed = new Date() - start
-  payload.status = 'error'
-  payload.status_code = err.code
-  payload.request = request
-  payload.error = { message: err.message, code: err.code }
+const populateErrorResponse = (request, response, err, start) => {
+  const payload = {
+    time_elapsed: new Date() - start,
+    status: 'error',
+    status_code: err.code,
+    request: request,
+    error: {
+      message: err.message,
+      code: err.code
+    }
+  }
 
-  response.statusCode = err.code
-  response.body = payload
+  _.set(response, 'statusCode', err.code)
+  _.set(response, 'body', payload)
 }
 
-const createSuccessResponse = (request, response, payload, geoResult, asnResult, start) => {
-  const location = {}
-  const timezone = {}
-  const security = {}
-  const isp = {}
+const populateSuccessResponse = (request, response, geoResult, asnResult, start) => {
+  const payload = {
+    time_elapsed: new Date() - start,
+    status: 'success',
+    status_code: http.OK,
+    request: request,
+    location: {
+      ip: geoResult.ip,
+      latitude: geoResult.latitude,
+      longitude: geoResult.longitude,
+      city_name: geoResult.city_name,
+      region_name: geoResult.subdivision_1_name,
+      region_iso_code: geoResult.subdivision_1_iso_code,
+      postal_code: geoResult.postal_code,
+      country_name: geoResult.country_name,
+      country_iso_code: geoResult.country_iso_code,
+      continent_name: geoResult.continent_name,
+      continent_code: geoResult.continent_code
+    },
+    timezone: {
+      time_zone: geoResult.time_zone,
+      time_zone_abbr: geoResult.time_zone_abbr,
+      time_zone_offset: geoResult.time_zone_offset,
+      time_zone_is_dst: geoResult.time_zone_is_dst,
+      time_zone_current_time: geoResult.time_zone_current_time
+    },
+    security: {
+      is_anonymous_proxy: geoResult.is_anonymous_proxy,
+      is_satellite_provider: geoResult.is_satellite_provider
+    },
+    isp: {
+      asn: asnResult.asn,
+      organization: asnResult.organization
+    }
+  }
 
-  payload.time_elapsed = new Date() - start
-  payload.status = 'success'
-  payload.status_code = 200
-  payload.request = request
-
-  location.ip = geoResult.ip
-  location.latitude = geoResult.latitude
-  location.longitude = geoResult.longitude
-  location.city_name = geoResult.city_name
-  location.region_name = geoResult.subdivision_1_name
-  location.region_iso_code = geoResult.subdivision_1_iso_code
-  location.postal_code = geoResult.postal_code
-  location.country_name = geoResult.country_name
-  location.country_iso_code = geoResult.country_iso_code
-  location.continent_name = geoResult.continent_name
-  location.continent_code = geoResult.continent_code
-  payload.location = location
-
-  timezone.time_zone = geoResult.time_zone
-  timezone.time_zone_abbr = geoResult.time_zone_abbr
-  timezone.time_zone_offset = geoResult.time_zone_offset
-  timezone.time_zone_is_dst = geoResult.time_zone_is_dst
-  timezone.time_zone_current_time = geoResult.time_zone_current_time
-  payload.timezone = timezone
-
-  security.is_anonymous_proxy = geoResult.is_anonymous_proxy
-  security.is_satellite_provider = geoResult.is_satellite_provider
-  payload.security = security
-
-  isp.asn = asnResult.asn
-  isp.organization = asnResult.organization
-  payload.isp = isp
-
-  response.statusCode = 200
-  response.body = payload
+  _.set(response, 'statusCode', http.OK)
+  _.set(response, 'body', payload)
 }
 
 /* istanbul ignore next */

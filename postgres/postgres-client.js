@@ -22,14 +22,14 @@ let client
 
 /* istanbul ignore next */
 if (process.env.NODE_ENV !== 'unit') {
-  // logger.log({ level: 'info', message: `postgres-client - opts: ${JSON.stringify(postgresOpts, null, 2)}` })
+  // logger.log({ level: 'info', src: 'redis/redis-client', opts })
 
   client = new Client(postgresOpts)
   client.connect(err => {
     if (err) {
-      logger.log({ level: 'error', message: `postgres-client - error: ${err}` })
+      logger.log({ level: 'error', src: 'postgres/postgres-client', message: 'error', error: err.message })
     } else {
-      logger.log({ level: 'info', message: 'postgres-client - connected' })
+      logger.log({ level: 'info', src: 'postgres/postgres-client', message: 'connected' })
     }
   })
 }

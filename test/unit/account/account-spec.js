@@ -37,22 +37,6 @@ const validEvent = {
   headers: {}
 }
 
-const validateErrorResponse = (response) => {
-  expect(response).to.be.an('object')
-  expect(response.body).to.be.an('object')
-  expect(response.body.status).to.equal('error')
-  expect(response.body.status_code).to.equal(500)
-  expect(response.body.error).to.be.an('object')
-  expect(response.body.error.message).to.equal('ACCOUNT_CREATION_UNSUCCESSFUL')
-  expect(response.body.error.code).to.equal(500)
-}
-const validateSuccessResponse = (response) => {
-  expect(response).to.be.an('object')
-  expect(response.body).to.be.an('object')
-  expect(response.body.status).to.equal('success')
-  expect(response.body.status_code).to.equal(200)
-}
-
 describe('account/account.create test', () => {
   it('should return well formed error response when error is thrown by validation (null event)', () => {
     const accountProxy = unit({})
@@ -523,3 +507,23 @@ describe('account/account.create test', () => {
       .then(response => validateSuccessResponse(response))
   })
 })
+
+const validateErrorResponse = (response) => {
+  expect(response).to.be.an('object')
+  expect(response.body).to.be.an('string')
+
+  const payload = JSON.parse(response.body)
+  expect(payload.status).to.equal('error')
+  expect(payload.status_code).to.equal(500)
+  expect(payload.error).to.be.an('object')
+  expect(payload.error.message).to.equal('ACCOUNT_CREATION_UNSUCCESSFUL')
+  expect(payload.error.code).to.equal(500)
+}
+const validateSuccessResponse = (response) => {
+  expect(response).to.be.an('object')
+  expect(response.body).to.be.an('string')
+
+  const payload = JSON.parse(response.body)
+  expect(payload.status).to.equal('success')
+  expect(payload.status_code).to.equal(200)
+}

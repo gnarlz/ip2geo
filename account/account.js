@@ -3,6 +3,10 @@
 const moment = require('moment')
 const uuidv4 = require('uuid/v4')
 const http = require('http-codes')
+const _ = {
+  get: require('lodash.get'),
+  set: require('lodash.set')
+}
 const winston = require('winston')
 const logger = winston.createLogger({ transports: [new winston.transports.Console()] })
 const plans = require('./plans')
@@ -53,12 +57,12 @@ const create = async (event, context) => {
   try {
     validate.accountEvent(event)
   } catch (error) {
-    logger.log({ requestId, level: 'error', message: `account.create - validation error: ${error}  event: ${JSON.stringify(event)} ` })
+    logger.log({ requestId, level: 'error', src: 'account.create', error: error.message, event })
     return createErrorResponse(request, start)
   }
 
   const accountData = populateAccountData(event)
-  logger.log({ requestId, level: 'info', message: `account.create - accountData: ${JSON.stringify(accountData)}` })
+  logger.log({ requestId, level: 'info', src: 'account.create', accountData })
 
   return Promise.all([
     insertPostgresKeyAccount(accountData, requestId),
@@ -71,14 +75,14 @@ const create = async (event, context) => {
       return emailer.sendNewSubscriberEmail(accountData, requestId)
     })
     .then(() => {
-      accountData.status = 'SUCCESS'
-      accountData.message = 'account created'
-      logger.log({ requestId, level: 'info', message: `account.create - successfully created account: ${JSON.stringify(accountData)}` })
+      _.set(accountData, 'status', 'success')
+      _.set(accountData, 'message', 'account created')
+      logger.log({ requestId, level: 'info', src: 'account.create', message: 'successfully created account', accountData })
     })
     .catch((error) => {
-      accountData.status = 'FAILURE'
-      accountData.message = `account not created - error: ${error}`
-      logger.log({ requestId, level: 'error', message: `account.create - error creating account: ${JSON.stringify(accountData)}   error: ${error}` })
+      _.set(accountData, 'status', 'error')
+      _.set(accountData, 'message', 'account not created')
+      logger.log({ requestId, level: 'error', src: 'account.create', message: 'error creating account', accountData, error: error.message })
       return error
     })
     .then((error) => {
@@ -90,20 +94,21 @@ const create = async (event, context) => {
 }
 
 const populateAccountData = (event) => {
-  const accountData = {}
-  accountData.action = 'account.create'
-  accountData.ts = moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS')
-  accountData.key = uuidv4()
-  accountData.subscription_id = event.subscription_id
-  accountData.email = event.stripeEmail
-  accountData.plan_id = event.planID
-  accountData.plan_name = event.plan_name
-  accountData.plan_created_at = plans[event.plan_name].created_at
-  accountData.display_name = plans[event.plan_name].display_name
-  accountData.limit = plans[event.plan_name].limit
-  accountData.ratelimit_max = plans[event.plan_name].ratelimit_max
-  accountData.ratelimit_duration = plans[event.plan_name].ratelimit_duration
-  accountData.price = plans[event.plan_name].price
+  const accountData = {
+    action: 'account.create',
+    ts: moment().format('YYYY-MM-DD HH:mm:ss.SSSSSS'),
+    key: uuidv4(),
+    subscription_id: event.subscription_id,
+    email: event.stripeEmail,
+    plan_id: event.planID,
+    plan_name: event.plan_name,
+    plan_created_at: plans[event.plan_name].created_at,
+    display_name: plans[event.plan_name].display_name,
+    limit: plans[event.plan_name].limit,
+    ratelimit_max: plans[event.plan_name].ratelimit_max,
+    ratelimit_duration: plans[event.plan_name].ratelimit_duration,
+    price: plans[event.plan_name].price
+  }
   return accountData
 }
 
@@ -111,18 +116,19 @@ const createErrorResponse = (request, start) => {
   const response = {}
   utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
-  const payload = {}
-  payload.time_elapsed = new Date() - start
-  payload.status = 'error'
-  payload.status_code = http.INTERNAL_SERVER_ERROR
-  payload.request = request
-  payload.error = {
-    message: errors.ACCOUNT_CREATION_UNSUCCESSFUL,
-    code: http.INTERNAL_SERVER_ERROR
+  const payload = {
+    time_elapsed: new Date() - start,
+    status: 'error',
+    status_code: http.INTERNAL_SERVER_ERROR,
+    request: request,
+    error: {
+      message: errors.ACCOUNT_CREATION_UNSUCCESSFUL,
+      code: http.INTERNAL_SERVER_ERROR
+    }
   }
 
-  response.statusCode = http.INTERNAL_SERVER_ERROR
-  response.body = payload
+  _.set(response, 'statusCode', http.INTERNAL_SERVER_ERROR)
+  _.set(response, 'body', JSON.stringify(payload))
   return response
 }
 
@@ -130,14 +136,15 @@ const createSuccessResponse = (request, start) => {
   const response = {}
   utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
-  const payload = {}
-  payload.time_elapsed = new Date() - start
-  payload.status = 'success'
-  payload.status_code = http.OK
-  payload.request = request
+  const payload = {
+    time_elapsed: new Date() - start,
+    status: 'success',
+    status_code: http.OK,
+    request: request
+  }
 
-  response.statusCode = http.OK
-  response.body = payload
+  _.set(response, 'statusCode', http.OK)
+  _.set(response, 'body', JSON.stringify(payload))
   return response
 }
 

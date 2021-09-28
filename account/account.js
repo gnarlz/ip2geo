@@ -57,12 +57,12 @@ const create = async (event, context) => {
   try {
     validate.accountEvent(event)
   } catch (error) {
-    logger.log({ requestId, level: 'error', src: 'account.create', error: error.message, event })
+    logger.log({ requestId, level: 'error', src: 'account/account.create', error: error.message, event })
     return createErrorResponse(request, start)
   }
 
   const accountData = populateAccountData(event)
-  logger.log({ requestId, level: 'info', src: 'account.create', accountData })
+  logger.log({ requestId, level: 'info', src: 'account/account.create', accountData })
 
   return Promise.all([
     insertPostgresKeyAccount(accountData, requestId),
@@ -77,12 +77,12 @@ const create = async (event, context) => {
     .then(() => {
       _.set(accountData, 'status', 'success')
       _.set(accountData, 'message', 'account created')
-      logger.log({ requestId, level: 'info', src: 'account.create', message: 'successfully created account', accountData })
+      logger.log({ requestId, level: 'info', src: 'account/account.create', message: 'successfully created account', accountData })
     })
     .catch((error) => {
       _.set(accountData, 'status', 'error')
       _.set(accountData, 'message', 'account not created')
-      logger.log({ requestId, level: 'error', src: 'account.create', message: 'error creating account', accountData, error: error.message })
+      logger.log({ requestId, level: 'error', src: 'account/account.create', message: 'error creating account', accountData, error: error.message })
       return error
     })
     .then((error) => {

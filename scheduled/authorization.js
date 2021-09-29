@@ -25,7 +25,7 @@ const run = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const requestId = context.awsRequestId
-  logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run',  message: 'start' })
+  logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'start' })
 
   let rows
   const response = {}
@@ -59,7 +59,7 @@ const run = async (event, context) => {
       return response
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', src: 'scheduled/authorization.run', message: `error`, error })
+      logger.log({ requestId, level: 'error', src: 'scheduled/authorization.run', message: 'error', error })
       response.statusCode = http.INTERNAL_SERVER_ERROR
       return response
     })

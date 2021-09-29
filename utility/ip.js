@@ -10,7 +10,8 @@ const logger = winston.createLogger({ transports: [new winston.transports.Consol
 // takes any valid ipv4 or iov6 address and converts it to an number (ipv4) or string (ipv6)
 const numeric = (ip, requestId) => {
   if (!isIp(ip)) {
-    logger.log({ requestId, level: 'error', message: `utility/ip.numeric - ip is not valid: ${ip}` })
+    logger.log({ requestId, level: 'error', src: 'utility/ip.numeric', message: 'invalid ip', ip })
+
     const error = new Error()
     error.message = `Invalid IP Address included in the request: ${ip}`
     error.code = http.BAD_REQUEST

@@ -43,7 +43,7 @@ const subscribe = async (event, context, planID) => {
   try {
     validate.subscriptionEvent(event)
   } catch (error) {
-    logger.log({ requestId, level: 'error', message: `subscribe.subscribe - validation error: ${error}  event: ${JSON.stringify(event)}` })
+    logger.log({ requestId, level: 'error', src: 'subscribe/subscribe.subscribe', message: 'validation error', error: error.message, event })
     return createErrorResponse()
   }
 
@@ -51,27 +51,25 @@ const subscribe = async (event, context, planID) => {
   subscriptionData.plan_name = params.get('plan_name')
   subscriptionData.stripeToken = params.get('stripeToken')
   subscriptionData.stripeEmail = params.get('stripeEmail')
-  logger.log({ requestId, level: 'info', message: `subscribe.subscribe - attempting to create payment method for subscriptionData: ${JSON.stringify(subscriptionData)}` })
+  logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create payment method ', subscriptionData, event })
 
   return stripe.paymentMethods.create({ type: 'card', card: { token: subscriptionData.stripeToken } })
     .then((paymentMethod) => {
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - successfully created payment method: ${JSON.stringify(paymentMethod)}` })
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - attempting to create customer for subscriptionData: ${JSON.stringify(subscriptionData)}` })
-
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created payment method', subscriptionData, paymentMethod, event })
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create customer', subscriptionData, event })
       return stripe.customers.create({ payment_method: paymentMethod.id, email: subscriptionData.stripeEmail })
     })
     .then((customer) => {
       subscriptionData.customer_id = customer.id
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - successfully created customer: ${JSON.stringify(customer)}` })
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - attempting to create subscription for subscriptionData: ${JSON.stringify(subscriptionData)}` })
-
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created customer', subscriptionData, customer, event })
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create subscription', subscriptionData, event })
       return stripe.subscriptions.create({ customer: subscriptionData.customer_id, items: [{ plan: subscriptionData.planID }], trial_period_days: 30 })
     })
     .then((subscription) => {
       // subscription has been created in stripe - now create the corresponding account on our side
       subscriptionData.subscription_id = subscription.id
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - successfully created subscription: ${JSON.stringify(subscription)}` })
-      logger.log({ requestId, level: 'info', message: `subscribe.subscribe - attempting to create ip2geo account for subscriptionData: ${JSON.stringify(subscriptionData)}` })
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created subscription', subscriptionData, subscription, event })
+      logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create ip2geo account', subscriptionData, event })
 
       // TODO: not best practice, refactor
       const createAccount = new AWS.Lambda()
@@ -85,15 +83,15 @@ const subscribe = async (event, context, planID) => {
     })
     .then((accountCreationResponse) => {
       if (accountCreationResponse.statusCode === http.OK) {
-        logger.log({ requestId, level: 'info', message: `subscribe.subscribe - successfully created ip2geo account for subscriptionData: ${JSON.stringify(subscriptionData)}   accountCreationResponse: ${JSON.stringify(accountCreationResponse)}` })
+        logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created ip2geo account', subscriptionData, accountCreationResponse, event })
         return createSuccessResponse()
       } else {
-        logger.log({ requestId, level: 'error', message: `subscribe.subscribe - did not successfully create ip2geo account for subscriptionData: ${JSON.stringify(subscriptionData)}  accountCreationResponse: ${JSON.stringify(accountCreationResponse)}` })
+        logger.log({ requestId, level: 'error', src: 'subscribe/subscribe.subscribe', message: 'did not successfully create ip2geo account', subscriptionData, accountCreationResponse, event })
         return createErrorResponse()
       }
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `subscribe.subscribe - error creating subscription and account for subscriptionData: ${JSON.stringify(subscriptionData)}  error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'subscribe/subscribe.subscribe', message: 'error creating subscription and ip2geo account', subscriptionData, event, error: error.message })
       return createErrorResponse()
     })
 }

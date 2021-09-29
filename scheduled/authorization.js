@@ -25,40 +25,41 @@ const run = async (event, context) => {
   context.callbackWaitsForEmptyEventLoop = false
 
   const requestId = context.awsRequestId
-  logger.log({ requestId, level: 'info', message: 'authorization.run - start' })
+  logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run',  message: 'start' })
+
   let rows
   const response = {}
   utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
   return postgresClient.query(findOverLimitKeysSQL)
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `authorization.run - found  ${result.rows.length} keys that need to be expired` })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: `found  ${result.rows.length} keys that need to be expired` })
       rows = result.rows
 
       if (!rows.length) {
-        logger.log({ requestId, level: 'info', message: 'authorization.run - no keys to update' })
+        logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'no keys to update' })
         return null
       }
 
-      logger.log({ requestId, level: 'info', message: 'authorization.run - attempting to set rows in redis for all expired keys' })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'attempting to upsert into redis for all expired keys' })
       return Promise.all(rows.map(row => setRedisAuthorization(row, requestId)))
     })
     .then((redisResponse) => {
       if (!redisResponse) return null
 
-      logger.log({ requestId, level: 'info', message: 'authorization.run - successfully set rows in redis for all expired keys' })
-      logger.log({ requestId, level: 'info', message: 'authorization.run - attempting to insert rows in postgres for all expired keys' })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'successfully upserted into redis for all expired keys' })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'attempting to insert rows in postgres for all expired keys' })
       return Promise.all(rows.map(row => insertPostgresAuthorization(row, requestId)))
     })
     .then((postgresResponse) => {
       if (postgresResponse) {
-        logger.log({ requestId, level: 'info', message: 'authorization.run - successfully inserted rows in postgres for all expired keys' })
+        logger.log({ requestId, level: 'info', src: 'scheduled/authorization.run', message: 'successfully inserted rows in postgres for all expired keys' })
       }
       response.statusCode = http.OK
       return response
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `authorization.run - error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'scheduled/authorization.run', message: `error`, error })
       response.statusCode = http.INTERNAL_SERVER_ERROR
       return response
     })
@@ -75,18 +76,18 @@ const setRedisAuthorization = async (row, requestId) => {
   payload.ratelimit_duration = row.ratelimit_duration ? row.ratelimit_duration : null
 
   const akey = `authorized:${key}`
-  logger.log({ requestId, level: 'info', message: `authorization.setRedisAuthorization - setting this key to expired in redis: ${akey}   (requests: ${row.request_total}  limit: ${row.limit_})` })
+  logger.log({ requestId, level: 'info', src: 'scheduled/authorization.setRedisAuthorization', message: `upserting into redis for key: ${akey}   (requests: ${row.request_total}  limit: ${row.limit_})` })
 
   const args = [akey, JSON.stringify(payload)]
 
   const redisClientSendCommand = util.promisify(redisClient.send_command).bind(redisClient)
   return redisClientSendCommand('SET', args)
     .then(() => {
-      logger.log({ requestId, level: 'info', message: `authorization.setRedisAuthorization - set expired authorization in redis    key: ${akey}` })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.setRedisAuthorization', message: `upserted into redis for key: ${akey}` })
       return null
     })
     .catch((error) => {
-      logger.log({ requestId, level: 'error', message: `authorization.setRedisAuthorization - error attempting to set expired authorization in redis    key: ${akey}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'scheduled/authorization.setRedisAuthorization', message: `error upserting into redis for key: ${akey}    error: ${error}` })
       throw error
     })
 }
@@ -99,15 +100,15 @@ const insertPostgresAuthorization = async (row, requestId) => {
   const sql = "INSERT INTO key.authorization (key, authorized, message, created_at, updated_at, ratelimit_max, ratelimit_duration) values ('" +
     key + "', false, '" + message + "', now(), now(), " + ratelimitMax + ' , ' + ratelimitDuration + ')'
 
-  logger.log({ requestId, level: 'info', message: `authorization.insertPostgresAuthorization - inserting row into postgres key.authorization: ${row.key}   (requests: ${row.request_total}  limit: ${row.limit_})` })
+  logger.log({ requestId, level: 'info', src: 'scheduled/authorization.insertPostgresAuthorization', message: `inserting row into postgres key.authorization for key: ${key}   (requests: ${row.request_total}  limit: ${row.limit_})` })
 
   return postgresClient.query(sql)
     .then(result => {
-      logger.log({ requestId, level: 'info', message: `authorization.insertPostgresAuthorization - inserted row into postgres key.authorization    key: ${key} ` })
+      logger.log({ requestId, level: 'info', src: 'scheduled/authorization.insertPostgresAuthorization', message: `inserted row into postgres key.authorization for key: ${key}` })
       return null
     })
     .catch(error => {
-      logger.log({ requestId, level: 'error', message: `authorization.insertPostgresAuthorization - error inserting into postgres key.authorization    key: ${key}    error: ${error}` })
+      logger.log({ requestId, level: 'error', src: 'scheduled/authorization.insertPostgresAuthorization', message: `error inserting into postgres key.authorization for key: ${key}    error: ${error}` })
       throw error
     })
 }

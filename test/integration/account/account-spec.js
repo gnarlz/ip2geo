@@ -19,12 +19,11 @@ const validEvent = {
   headers: {}
 }
 
-describe.only('/account/account.create test', () => {
+describe('/account/account.create test', () => {
   it('should happily work', () => {
     const account = require('../../../account/account')
     return account.create(validEvent, validContext)
       .then((response) => {
-        console.log(`$$$$$$$$$ response: ${JSON.stringify(response, null, 2)}`)
         expect(response).to.be.a('object')
         expect(response.statusCode).to.equal(200)
       })

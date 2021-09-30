@@ -6,6 +6,10 @@ const uuidv4 = require('uuid/v4')
 
 const validContext = { awsRequestId: uuidv4() }
 const validEvent = {
+  subscription_id: uuidv4(),
+  stripeEmail: 'postmark@telematic.io',
+  planID: 'plan_GVK3dbrCJxAEqa',
+  plan_name: 'mvp_001',
   queryStringParameters: {},
   requestContext: {
     identity: {
@@ -15,11 +19,12 @@ const validEvent = {
   headers: {}
 }
 
-describe('/scheduled/authorization.run test', () => {
+describe.only('/account/account.create test', () => {
   it('should happily work', () => {
-    const authorization = require('../../../scheduled/authorization')
-    return authorization.run(validEvent, validContext)
+    const account = require('../../../account/account')
+    return account.create(validEvent, validContext)
       .then((response) => {
+        console.log(`$$$$$$$$$ response: ${JSON.stringify(response, null, 2)}`)
         expect(response).to.be.a('object')
         expect(response.statusCode).to.equal(200)
       })

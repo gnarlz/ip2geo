@@ -65,9 +65,9 @@ const sendEmail = async (accountData, htmlContent, textContent, requestId) => {
   const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY)
 
   const message = {
-    From: 'support@ip2geo.co',
+    From: 'postmark@telematic.io',
     To: accountData.email,
-    Cc: 'support@ip2geo.co',
+    Cc: 'postmark@telematic.io',
     ReplyTo: 'support@ip2geo.co',
     Subject: 'Welcome to ip2geo! Here is your API key',
     HtmlBody: "'" + htmlContent + "'",

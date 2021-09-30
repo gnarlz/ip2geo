@@ -23,7 +23,7 @@ const validEvent = {
   headers: {}
 }
 
-describe('handler test', () => {
+describe('handler.lookup test', () => {
   it('should happily work with ip in query string', () => {
     return handler.lookup(validEvent, validContext)
       .then((response) => {

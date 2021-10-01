@@ -96,7 +96,10 @@ const subscribe = async (event, context, planID) => {
       }
     })
     .then((accountCreationResponse) => {
-      if (accountCreationResponse.statusCode === http.OK) {
+      if (accountCreationResponse.statusCode === http.OK) { // handles when account.create is running locally (unit and integration tests)
+        logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created ip2geo account', subscriptionData, accountCreationResponse, event })
+        return createSuccessResponse()
+      } else if (accountCreationResponse.StatusCode === http.OK) { // handles when account.create is running in aws (i.e.: the deployed application)
         logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created ip2geo account', subscriptionData, accountCreationResponse, event })
         return createSuccessResponse()
       } else {

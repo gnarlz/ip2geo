@@ -52,13 +52,12 @@ const create = async (event, context) => {
 
   const start = new Date()
   const requestId = context.awsRequestId
-  const request = utilities.enrichRequest(event, context)
 
   try {
     validate.accountEvent(event)
   } catch (error) {
     logger.log({ requestId, level: 'error', src: 'account/account.create', error: error.message, event })
-    return createErrorResponse(request, start)
+    return createErrorResponse(start)
   }
 
   const accountData = populateAccountData(event)
@@ -88,8 +87,8 @@ const create = async (event, context) => {
     .then((error) => {
       sendAccountCreationTextAndEmail(accountData, requestId) // this will be called for both success and failure
 
-      if (error) return createErrorResponse(request, start)
-      return createSuccessResponse(request, start)
+      if (error) return createErrorResponse(start)
+      return createSuccessResponse(start)
     })
 }
 
@@ -112,7 +111,7 @@ const populateAccountData = (event) => {
   return accountData
 }
 
-const createErrorResponse = (request, start) => {
+const createErrorResponse = (start) => {
   const response = {}
   utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
@@ -120,7 +119,6 @@ const createErrorResponse = (request, start) => {
     time_elapsed: new Date() - start,
     status: 'error',
     status_code: http.INTERNAL_SERVER_ERROR,
-    request: request,
     error: {
       message: errors.ACCOUNT_CREATION_UNSUCCESSFUL,
       code: http.INTERNAL_SERVER_ERROR
@@ -132,15 +130,14 @@ const createErrorResponse = (request, start) => {
   return response
 }
 
-const createSuccessResponse = (request, start) => {
+const createSuccessResponse = (start) => {
   const response = {}
   utilities.setResponseHeadersCORS(response) // enable CORS in api gateway when using lambda proxy integration
 
   const payload = {
     time_elapsed: new Date() - start,
     status: 'success',
-    status_code: http.OK,
-    request: request
+    status_code: http.OK
   }
 
   _.set(response, 'statusCode', http.OK)

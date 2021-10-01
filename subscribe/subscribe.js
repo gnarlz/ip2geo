@@ -3,6 +3,9 @@
 const stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY)
 const AWS = require('aws-sdk')
 const http = require('http-codes')
+const _ = {
+  set: require('lodash.set')
+}
 const validate = require('./validate')
 const utilities = require('../utility/utilities')
 const winston = require('winston')
@@ -71,6 +74,27 @@ const subscribe = async (event, context, planID) => {
       logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created subscription', subscriptionData, subscription, event })
       logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create ip2geo account', subscriptionData, event })
 
+      if (process.env.NODE_ENV === 'int') {
+        // invoke local account.create when running integration tests
+        _.set(event, 'subscription_id', subscriptionData.subscription_id)
+        _.set(event, 'stripeEmail', subscriptionData.stripeEmail)
+        _.set(event, 'planID', subscriptionData.planID)
+        _.set(event, 'plan_name', subscriptionData.plan_name)
+
+        const account = require('../account/account')
+        return account.create(event, context)
+      } else {
+        const createAccount = new AWS.Lambda() // TODO: not best practice, refactor
+        const params = {
+          FunctionName: process.env.CREATE_ACCOUNT_FUNCTION_NAME,
+          InvocationType: 'RequestResponse',
+          LogType: 'Tail',
+          Payload: JSON.stringify(subscriptionData)
+        }
+        return createAccount.invoke(params).promise() // this always returns a well formed JSON response
+      }
+
+      /*
       // TODO: not best practice, refactor
       const createAccount = new AWS.Lambda()
       const params = {
@@ -80,6 +104,7 @@ const subscribe = async (event, context, planID) => {
         Payload: JSON.stringify(subscriptionData)
       }
       return createAccount.invoke(params).promise() // this always returns a well formed JSON response
+      */
     })
     .then((accountCreationResponse) => {
       if (accountCreationResponse.statusCode === http.OK) {

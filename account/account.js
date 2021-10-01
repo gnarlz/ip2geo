@@ -44,7 +44,7 @@ const {
  * @param {Array} [event.headers] (required)
  * @param {Object} context (required)
  * @param {String} context.awsRequestId (required)
- * @return {Object} Well formed JSON response containing information on whether the accout creation was successful or not.
+ * @return {Object} Well formed JSON response containing information on whether the account creation was successful or not.
  * @public
  */
 const create = async (event, context) => {

@@ -74,6 +74,7 @@ const subscribe = async (event, context, planID) => {
       logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'successfully created subscription', subscriptionData, subscription, event })
       logger.log({ requestId, level: 'info', src: 'subscribe/subscribe.subscribe', message: 'attempting to create ip2geo account', subscriptionData, event })
 
+      /* istanbul ignore next */
       if (process.env.NODE_ENV === 'int') {
         // invoke local account.create when running integration tests
         _.set(event, 'subscription_id', subscriptionData.subscription_id)
@@ -93,18 +94,6 @@ const subscribe = async (event, context, planID) => {
         }
         return createAccount.invoke(params).promise() // this always returns a well formed JSON response
       }
-
-      /*
-      // TODO: not best practice, refactor
-      const createAccount = new AWS.Lambda()
-      const params = {
-        FunctionName: process.env.CREATE_ACCOUNT_FUNCTION_NAME,
-        InvocationType: 'RequestResponse',
-        LogType: 'Tail',
-        Payload: JSON.stringify(subscriptionData)
-      }
-      return createAccount.invoke(params).promise() // this always returns a well formed JSON response
-      */
     })
     .then((accountCreationResponse) => {
       if (accountCreationResponse.statusCode === http.OK) {

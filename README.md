@@ -86,7 +86,6 @@ Geolocation and firmographic data reside in Redis. All IP address CIDR ranges ar
 
 Account and subscription data reside in Postgress. Due to their [slowly changing dimension](https://en.wikipedia.org/wiki/Slowly_changing_dimension) nature, the codebase considers (most of) these tables immutable, and only performs INSERTS against them (i.e. no UPDATES). As a result, all history is preserved.
 
-Postgres schemas are described [here](https://github.com/gnarlz/ip2geo/blob/master/ip2geo-postgres.sql).
 
 
 ## Design Considerations

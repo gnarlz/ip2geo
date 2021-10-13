@@ -111,7 +111,7 @@ Subscriber email is implemented by [Postmark](https://postmarkapp.com/loves/node
 
 
 ## Shoutouts 
-ip2geo enthusiastically uses the [servlerless framework](https://github.com/serverless/serverless).
+ip2geo enthusiastically uses the [serverless framework](https://github.com/serverless/serverless).
  
  
  
